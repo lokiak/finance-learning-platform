@@ -6,22 +6,22 @@ import { useUIStore } from '@/stores/uiStore';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 import Input from '@/components/shared/Input';
-import { UserProfile } from '@finance-platform/shared';
+import { UpdateProfileRequest } from '@finance-platform/shared';
 
 export default function Profile() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const { addNotification } = useUIStore();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<Partial<UserProfile>>({});
+  const [formData, setFormData] = useState<UpdateProfileRequest>({});
 
   const { data, isLoading } = useQuery({
     queryKey: ['profile'],
-    queryFn: () => api.getUserProfile(),
+    queryFn: () => api.getProfile(),
   });
 
   const updateProfileMutation = useMutation({
-    mutationFn: (data: Partial<UserProfile>) => api.updateUserProfile(data),
+    mutationFn: (data: UpdateProfileRequest) => api.updateProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       addNotification({
@@ -35,10 +35,10 @@ export default function Profile() {
   useEffect(() => {
     if (data?.profile) {
       setFormData({
-        age: data.profile.age,
-        current_income: data.profile.current_income,
+        age: data.profile.age ?? undefined,
+        current_income: data.profile.current_income ?? undefined,
         financial_goals: data.profile.financial_goals,
-        risk_tolerance: data.profile.risk_tolerance,
+        risk_tolerance: data.profile.risk_tolerance ?? undefined,
         has_debt: data.profile.has_debt,
         has_emergency_fund: data.profile.has_emergency_fund,
       });
@@ -147,7 +147,7 @@ export default function Profile() {
               type="number"
               value={formData.age || ''}
               onChange={(e) =>
-                setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : null })
+                setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : undefined })
               }
               placeholder="Enter your age"
             />
@@ -159,7 +159,7 @@ export default function Profile() {
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  current_income: e.target.value ? parseFloat(e.target.value) : null,
+                  current_income: e.target.value ? parseFloat(e.target.value) : undefined,
                 })
               }
               placeholder="e.g., 75000"
@@ -239,10 +239,10 @@ export default function Profile() {
                   setIsEditing(false);
                   if (profile) {
                     setFormData({
-                      age: profile.age,
-                      current_income: profile.current_income,
+                      age: profile.age ?? undefined,
+                      current_income: profile.current_income ?? undefined,
                       financial_goals: profile.financial_goals,
-                      risk_tolerance: profile.risk_tolerance,
+                      risk_tolerance: profile.risk_tolerance ?? undefined,
                       has_debt: profile.has_debt,
                       has_emergency_fund: profile.has_emergency_fund,
                     });
@@ -303,7 +303,7 @@ export default function Profile() {
               <div>
                 <p className="text-sm text-secondary-600 mb-2">Financial Goals</p>
                 <ul className="space-y-2">
-                  {profile.financial_goals.map((goal, index) => (
+                  {profile.financial_goals.map((goal: string, index: number) => (
                     <li key={index} className="flex items-start">
                       <svg
                         className="w-5 h-5 text-primary-600 mr-2 mt-0.5"

@@ -5,8 +5,8 @@ import {
   AuthResponse,
   UpdateProfileRequest,
   UserProfile,
-  Module,
   ModuleWithProgress,
+  ModuleWithContent,
   UserProgress,
   ProgressSummary,
   CalculatorData,
@@ -17,7 +17,7 @@ import {
   DashboardData,
 } from '@finance-platform/shared';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -97,7 +97,7 @@ class ApiClient {
     return response.data;
   }
 
-  async getModule(moduleId: string): Promise<{ module: Module; progress: UserProgress | null }> {
+  async getModule(moduleId: string): Promise<{ module: ModuleWithContent; progress: UserProgress | null }> {
     const response = await this.client.get(`/modules/${moduleId}`);
     return response.data;
   }

@@ -2,12 +2,9 @@ import { useState } from 'react';
 import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 import Input from '@/components/shared/Input';
-import Badge from '@/components/shared/Badge';
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,

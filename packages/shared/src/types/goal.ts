@@ -20,6 +20,8 @@ export interface CreateGoalRequest {
   description?: string;
   target_amount?: number;
   target_date?: string;
+  current_progress?: number;
+  status?: GoalStatus;
 }
 
 export interface UpdateGoalRequest {
@@ -30,3 +32,6 @@ export interface UpdateGoalRequest {
   current_progress?: number;
   status?: GoalStatus;
 }
+
+// Alias for backward compatibility
+export type Goal = UserGoal;

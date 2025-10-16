@@ -75,8 +75,8 @@ export default function Goals() {
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
+  const getCategoryIcon = (goal_type: string) => {
+    switch (goal_type) {
       case 'savings':
         return (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -219,7 +219,7 @@ export default function Goals() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
-                      {getCategoryIcon(goal.category)}
+                      {getCategoryIcon(goal.goal_type)}
                     </div>
                     <div>
                       <h3 className="font-semibold text-secondary-900 mb-1">{goal.title}</h3>
@@ -236,12 +236,11 @@ export default function Goals() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-secondary-700">Progress</span>
                       <span className="text-sm text-secondary-600">
-                        ${(goal.current_amount || 0).toLocaleString()} / $
-                        {goal.target_amount.toLocaleString()}
+                        {goal.current_progress}%
                       </span>
                     </div>
                     <ProgressBar
-                      value={Math.round(((goal.current_amount || 0) / goal.target_amount) * 100)}
+                      value={goal.current_progress}
                     />
                   </div>
                 )}
@@ -292,7 +291,7 @@ export default function Goals() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-success-100 rounded-lg flex items-center justify-center text-success-600">
-                      {getCategoryIcon(goal.category)}
+                      {getCategoryIcon(goal.goal_type)}
                     </div>
                     <div>
                       <h3 className="font-semibold text-secondary-900 mb-1">{goal.title}</h3>
@@ -368,9 +367,9 @@ function GoalModal({ goal, isOpen, onClose, onSubmit, isLoading }: GoalModalProp
   const [formData, setFormData] = useState<CreateGoalRequest>({
     title: goal?.title || '',
     description: goal?.description || '',
-    category: goal?.category || 'savings',
+    goal_type: goal?.goal_type || 'savings',
     target_amount: goal?.target_amount || undefined,
-    current_amount: goal?.current_amount || undefined,
+    current_progress: goal?.current_progress || undefined,
     target_date: goal?.target_date ? new Date(goal.target_date).toISOString().split('T')[0] : '',
     status: goal?.status || 'active',
   });
@@ -424,11 +423,11 @@ function GoalModal({ goal, isOpen, onClose, onSubmit, isLoading }: GoalModalProp
 
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-1">
-                Category
+                Goal Type
               </label>
               <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                value={formData.goal_type}
+                onChange={(e) => setFormData({ ...formData, goal_type: e.target.value })}
                 className="w-full px-3 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="savings">Savings</option>
@@ -453,16 +452,17 @@ function GoalModal({ goal, isOpen, onClose, onSubmit, isLoading }: GoalModalProp
             />
 
             <Input
-              label="Current Amount"
+              label="Current Progress (%)"
               type="number"
-              value={formData.current_amount || ''}
+              value={formData.current_progress || ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  current_amount: e.target.value ? parseFloat(e.target.value) : undefined,
+                  current_progress: e.target.value ? parseFloat(e.target.value) : undefined,
                 })
               }
-              placeholder="e.g., 2500"
+              placeholder="e.g., 25"
+              step="0.1"
             />
 
             <Input

@@ -7,6 +7,7 @@ import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 import ProgressBar from '@/components/shared/ProgressBar';
 import Badge from '@/components/shared/Badge';
+import { ModuleContent } from '@finance-platform/shared';
 
 export default function ModuleView() {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -311,7 +312,7 @@ export default function ModuleView() {
             </div>
 
             <div className="grid grid-cols-4 gap-2 mb-4">
-              {sections.map((section, index) => (
+              {sections.map((section: ModuleContent, index: number) => (
                 <button
                   key={section.id}
                   onClick={() => setCurrentSectionIndex(index)}
