@@ -38,7 +38,7 @@ router.get(
 );
 
 // POST /api/auth/logout
-router.post('/logout', authenticate, (req: AuthRequest, res: Response) => {
+router.post('/logout', authenticate, (_req: AuthRequest, res: Response) => {
   // In a stateless JWT setup, logout is handled client-side
   // Future: implement token blacklisting if needed
   res.json({ success: true });

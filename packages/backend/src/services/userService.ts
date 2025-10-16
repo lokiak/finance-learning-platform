@@ -1,5 +1,5 @@
 import { prisma } from '../index';
-import { ErrorCodes, ErrorMessages, UpdateProfileRequest } from '@finance-platform/shared';
+import { ErrorCodes, UpdateProfileRequest } from '@finance-platform/shared';
 import { AppError } from '../middleware/errorHandler';
 
 export class UserService {
@@ -39,7 +39,7 @@ export class UserService {
     return profile;
   }
 
-  static async getDashboard Data(userId: string) {
+  static async getDashboardData(userId: string) {
     // Get user progress summary
     const allProgress = await prisma.userProgress.findMany({
       where: { user_id: userId },
@@ -47,8 +47,8 @@ export class UserService {
     });
 
     const totalModules = await prisma.module.count();
-    const completedModules = allProgress.filter(p => p.status === 'completed').length;
-    const totalTimeInvested = allProgress.reduce((sum, p) => sum + p.time_spent_minutes, 0);
+    const completedModules = allProgress.filter((p: any) => p.status === 'completed').length;
+    const totalTimeInvested = allProgress.reduce((sum: number, p: any) => sum + p.time_spent_minutes, 0);
 
     // Get recent achievements
     const recentAchievements = await prisma.achievement.findMany({
@@ -57,11 +57,11 @@ export class UserService {
       take: 5,
     });
 
-    // Get active goals
-    const activeGoals = await prisma.userGoal.findMany({
-      where: { user_id: userId, status: 'active' },
-      take: 3,
-    });
+    // Get active goals (for future use)
+    // const activeGoals = await prisma.userGoal.findMany({
+    //   where: { user_id: userId, status: 'active' },
+    //   take: 3,
+    // });
 
     // Determine current phase
     let currentPhase = 1;
@@ -72,7 +72,7 @@ export class UserService {
       const phaseProgress = await prisma.userProgress.findMany({
         where: {
           user_id: userId,
-          module_id: { in: phaseModules.map(m => m.id) },
+          module_id: { in: phaseModules.map((m: any) => m.id) },
           status: 'completed',
         },
       });
@@ -94,16 +94,16 @@ export class UserService {
         current_phase: currentPhase,
       },
       recent_activity: allProgress
-        .sort((a, b) => (b.last_accessed?.getTime() || 0) - (a.last_accessed?.getTime() || 0))
+        .sort((a: any, b: any) => (b.last_accessed?.getTime() || 0) - (a.last_accessed?.getTime() || 0))
         .slice(0, 5)
-        .map(p => ({
+        .map((p: any) => ({
           type: p.status === 'completed' ? 'module_completed' : 'module_started' as const,
           title: p.module.title,
           timestamp: p.last_accessed || p.created_at,
           module_id: p.module_id,
         })),
       next_steps: [], // Will be populated by logic
-      achievements: recentAchievements.map(a => ({
+      achievements: recentAchievements.map((a: any) => ({
         id: a.id,
         title: a.title,
         description: a.description || '',

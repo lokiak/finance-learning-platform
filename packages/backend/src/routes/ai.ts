@@ -93,7 +93,7 @@ router.get(
 // GET /api/ai/prompt-templates
 router.get(
   '/prompt-templates',
-  asyncHandler(async (req: AuthRequest, res: Response) => {
+  asyncHandler(async (_req: AuthRequest, res: Response) => {
     // TODO: Implement prompt templates from database or config
     const templates = [
       {

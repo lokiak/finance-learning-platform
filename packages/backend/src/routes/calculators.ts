@@ -10,7 +10,7 @@ router.use(authenticate);
 // GET /api/calculators
 router.get(
   '/',
-  asyncHandler(async (req: AuthRequest, res: Response) => {
+  asyncHandler(async (_req: AuthRequest, res: Response) => {
     const calculatorTypes = Object.values(CALCULATOR_TYPES).map(type => ({
       type,
       name: type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),

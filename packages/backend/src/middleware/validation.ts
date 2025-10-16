@@ -4,7 +4,7 @@ import { ErrorCodes } from '@finance-platform/shared';
 import { AppError } from './errorHandler';
 
 export const validateBody = (schema: ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req.body);
       req.body = validated;
@@ -23,7 +23,7 @@ export const validateBody = (schema: ZodSchema) => {
 };
 
 export const validateParams = (schema: ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req.params);
       req.params = validated;
@@ -42,7 +42,7 @@ export const validateParams = (schema: ZodSchema) => {
 };
 
 export const validateQuery = (schema: ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req.query);
       req.query = validated;

@@ -66,7 +66,7 @@ export default function Calculators() {
     {
       id: 'debt-payoff' as const,
       title: 'Debt Payoff Calculator',
-      description: 'Plan your debt repayment strategy and see when you'll be debt-free',
+      description: 'Plan your debt repayment strategy and see when you will be debt-free',
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
           <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />

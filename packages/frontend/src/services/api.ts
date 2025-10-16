@@ -116,7 +116,7 @@ class ApiClient {
     return response.data;
   }
 
-  async completeSec tion(sectionId: string, notes?: string) {
+  async completeSection(sectionId: string, notes?: string) {
     const response = await this.client.post(`/progress/section/${sectionId}/complete`, {
       notes,
     });

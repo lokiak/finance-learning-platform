@@ -16,7 +16,7 @@ router.get(
     });
 
     // TODO: Implement available achievements logic
-    const available = [];
+    const available: any[] = [];
 
     res.json({ achievements, available });
   })
