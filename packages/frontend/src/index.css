@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-secondary-50 text-secondary-900;
+  }
+
+  * {
+    @apply border-secondary-200;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-secondary-100;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-secondary-300 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-secondary-400;
+  }
+}

@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: finance-platform-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-finance_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-finance_password}
+      POSTGRES_DB: ${POSTGRES_DB:-finance_platform_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-finance_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finance-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    container_name: finance-platform-api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-finance_user}:${POSTGRES_PASSWORD:-finance_password}@postgres:5432/${POSTGRES_DB:-finance_platform_dev}
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/backend/src:/app/packages/backend/src
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./packages/shared/dist:/app/packages/shared/dist
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npm run dev --workspace=@finance-platform/backend
+    networks:
+      - finance-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: packages/frontend/Dockerfile
+    container_name: finance-platform-web
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./packages/frontend/src:/app/packages/frontend/src
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./packages/shared/dist:/app/packages/shared/dist
+    depends_on:
+      - backend
+    command: npm run dev --workspace=@finance-platform/frontend
+    networks:
+      - finance-network
+
+volumes:
+  postgres_data:
+
+networks:
+  finance-network:
+    driver: bridge
