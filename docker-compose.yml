@@ -22,6 +22,7 @@ services:
     build:
       context: .
       dockerfile: packages/backend/Dockerfile
+      target: development
     container_name: finance-platform-api
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-finance_user}:${POSTGRES_PASSWORD:-finance_password}@postgres:5432/${POSTGRES_DB:-finance_platform_dev}
@@ -45,6 +46,7 @@ services:
     build:
       context: .
       dockerfile: packages/frontend/Dockerfile
+      target: development
     container_name: finance-platform-web
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
