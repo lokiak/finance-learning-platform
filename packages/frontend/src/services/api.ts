@@ -220,6 +220,97 @@ class ApiClient {
     });
     return response.data;
   }
+
+  // Journal endpoints
+  async getJournalEntries(params?: {
+    entry_type?: string;
+    limit?: number;
+    offset?: number;
+    mood?: number;
+    stress_level?: number;
+    tags?: string[];
+    start_date?: string;
+    end_date?: string;
+    search?: string;
+  }) {
+    const response = await this.client.get('/journal', { params });
+    return response.data;
+  }
+
+  async getJournalEntry(id: string) {
+    const response = await this.client.get(`/journal/${id}`);
+    return response.data;
+  }
+
+  async getJournalStats() {
+    const response = await this.client.get('/journal/stats');
+    return response.data;
+  }
+
+  async getJournalPrompts(params?: {
+    category?: string;
+    trigger_type?: string;
+  }) {
+    const response = await this.client.get('/journal/prompts', { params });
+    return response.data;
+  }
+
+  async createJournalEntry(data: any) {
+    const response = await this.client.post('/journal', data);
+    return response.data;
+  }
+
+  async updateJournalEntry(id: string, data: any) {
+    const response = await this.client.put(`/journal/${id}`, data);
+    return response.data;
+  }
+
+  async deleteJournalEntry(id: string) {
+    await this.client.delete(`/journal/${id}`);
+  }
+
+  // Mood endpoints
+  async createMoodEntry(data: {
+    overall_mood: number;
+    financial_stress: number;
+    journaled_today: boolean;
+    completed_module: boolean;
+    completed_goal?: boolean;
+    meditation?: boolean;
+    exercise?: boolean;
+    notes?: string;
+  }) {
+    const response = await this.client.post('/mood', data);
+    return response.data;
+  }
+
+  async getMoodHistory(params?: {
+    start_date?: string;
+    end_date?: string;
+    limit?: number;
+  }) {
+    const response = await this.client.get('/mood/history', { params });
+    return response.data;
+  }
+
+  async getMoodInsights(params?: {
+    start_date?: string;
+    end_date?: string;
+  }) {
+    const response = await this.client.get('/mood/insights', { params });
+    return response.data;
+  }
+
+  // Preferences endpoints
+  async getPreferences() {
+    const response = await this.client.get('/preferences');
+    return response.data;
+  }
+
+  async updatePreferences(data: any) {
+    const response = await this.client.put('/preferences', data);
+    return response.data;
+  }
 }
 
 export const api = new ApiClient();

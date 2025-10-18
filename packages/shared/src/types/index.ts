@@ -6,3 +6,7 @@ export * from './goal';
 export * from './achievement';
 export * from './ai';
 export * from './api';
+export * from './journal';
+export * from './mood';
+export * from './preferences';
+export * from './soundscape';

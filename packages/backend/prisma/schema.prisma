@@ -37,6 +37,48 @@ enum GoalStatus {
   abandoned
 }
 
+enum EntryType {
+  free_form
+  module_reflection
+  goal
+  daily_checkin
+  prompted
+}
+
+enum PromptCategory {
+  money_mindset
+  goal_setting
+  challenges
+  gratitude
+  future_vision
+  reflection
+  celebration
+}
+
+enum TriggerType {
+  module_complete
+  goal_created
+  goal_milestone
+  mood_low
+  streak
+  time_based
+  random
+  onboarding
+}
+
+enum Theme {
+  light
+  dark
+  auto
+}
+
+enum Season {
+  spring
+  summer
+  autumn
+  winter
+}
+
 // User Models
 model User {
   id                String      @id @default(uuid())
@@ -49,13 +91,17 @@ model User {
   profile_completed Boolean     @default(false)
 
   // Relations
-  profile          UserProfile?
-  progress         UserProgress[]
-  section_progress SectionProgress[]
-  calculators      CalculatorData[]
-  goals            UserGoal[]
-  achievements     Achievement[]
-  conversations    AIConversation[]
+  profile           UserProfile?
+  progress          UserProgress[]
+  section_progress  SectionProgress[]
+  calculators       CalculatorData[]
+  goals             UserGoal[]
+  achievements      Achievement[]
+  conversations     AIConversation[]
+  journal_entries   JournalEntry[]
+  mood_entries      MoodEntry[]
+  preferences       UserPreferences?
+  journaling_streak JournalingStreak?
 
   @@index([email])
   @@map("users")
@@ -97,6 +143,7 @@ model Module {
   progress        UserProgress[]
   calculators     CalculatorData[]
   conversations   AIConversation[]
+  journal_entries JournalEntry[]
 
   @@unique([phase_number, module_number])
   @@index([phase_number])
@@ -204,7 +251,8 @@ model UserGoal {
   updated_at       DateTime   @updatedAt
 
   // Relations
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user            User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  journal_entries JournalEntry[]
 
   @@index([user_id])
   @@index([status])
@@ -246,4 +294,155 @@ model AIConversation {
   @@index([user_id])
   @@index([module_id])
   @@map("ai_conversations")
+}
+
+// Journal Models
+model JournalEntry {
+  id            String     @id @default(uuid())
+  user_id       String
+  entry_type    EntryType
+  title         String?    @db.VarChar(500)
+  content       Json       @db.JsonB
+  mood          Int?       @db.SmallInt
+  stress_level  Int?       @db.SmallInt
+  energy_level  Int?       @db.SmallInt
+  word_count    Int        @default(0)
+
+  // Associations
+  module_id     String?
+  goal_id       String?
+  prompt_id     String?
+
+  // Metadata
+  tags          String[]
+  is_favorite   Boolean    @default(false)
+  is_private    Boolean    @default(true)
+  share_token   String?    @unique @db.VarChar(50)
+
+  // Timestamps
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  deleted_at    DateTime?
+
+  // Relations
+  user   User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module Module?       @relation(fields: [module_id], references: [id], onDelete: SetNull)
+  goal   UserGoal?     @relation(fields: [goal_id], references: [id], onDelete: SetNull)
+  prompt JournalPrompt? @relation(fields: [prompt_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, created_at])
+  @@index([user_id, entry_type])
+  @@index([user_id, mood])
+  @@index([share_token])
+  @@map("journal_entries")
+}
+
+model JournalPrompt {
+  id              String         @id @default(uuid())
+  prompt_text     String         @db.Text
+  category        PromptCategory
+  subcategory     String?        @db.VarChar(100)
+
+  // Targeting
+  trigger_type    TriggerType
+  trigger_config  Json?          @db.JsonB
+
+  // Personalization
+  uses_name       Boolean        @default(false)
+  uses_goal_data  Boolean        @default(false)
+  min_engagement  Int?
+
+  // Metadata
+  is_active       Boolean        @default(true)
+  priority        Int            @default(0)
+  created_at      DateTime       @default(now())
+
+  // Relations
+  entries JournalEntry[]
+
+  @@index([category, is_active])
+  @@index([trigger_type, is_active])
+  @@map("journal_prompts")
+}
+
+model MoodEntry {
+  id               String   @id @default(uuid())
+  user_id          String
+
+  // Mood data
+  overall_mood     Int      @db.SmallInt
+  financial_stress Int      @db.SmallInt
+  energy_level     Int?     @db.SmallInt
+  note             String?  @db.Text
+
+  // Context
+  journaled_today  Boolean  @default(false)
+  completed_module Boolean  @default(false)
+  worked_on_goal   Boolean  @default(false)
+
+  created_at       DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at])
+  @@index([user_id, overall_mood])
+  @@map("mood_entries")
+}
+
+model UserPreferences {
+  id                    String   @id @default(uuid())
+  user_id               String   @unique
+
+  // Theme
+  theme                 Theme    @default(auto)
+  seasonal_theme        Boolean  @default(true)
+  time_based_theme      Boolean  @default(true)
+  preferred_season      Season?
+
+  // Sound
+  soundscape_enabled    Boolean  @default(false)
+  soundscape_type       String?  @db.VarChar(50)
+  soundscape_volume     Float    @default(0.5)
+  sound_effects_enabled Boolean  @default(true)
+
+  // Notifications
+  journal_reminders     Boolean  @default(true)
+  reminder_time         String?  @db.VarChar(10)
+  reminder_frequency    String   @default("daily") @db.VarChar(20)
+
+  // Content
+  show_stress_exercises Boolean  @default(true)
+  content_pacing        String   @default("medium") @db.VarChar(20)
+
+  // Accessibility
+  reduce_motion         Boolean  @default(false)
+  high_contrast         Boolean  @default(false)
+  font_size_adjust      Int      @default(0) @db.SmallInt
+
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model JournalingStreak {
+  id              String    @id @default(uuid())
+  user_id         String    @unique
+
+  current_streak  Int       @default(0)
+  longest_streak  Int       @default(0)
+  total_entries   Int       @default(0)
+
+  last_entry_date DateTime?
+  streak_started  DateTime?
+
+  updated_at      DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("journaling_streaks")
 }

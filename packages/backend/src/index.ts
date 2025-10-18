@@ -17,6 +17,9 @@ import calculatorRoutes from './routes/calculators';
 import goalRoutes from './routes/goals';
 import achievementRoutes from './routes/achievements';
 import aiRoutes from './routes/ai';
+import journalRoutes from './routes/journal';
+import moodRoutes from './routes/mood';
+import preferencesRoutes from './routes/preferences';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -49,6 +52,9 @@ app.use('/api/calculators', calculatorRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/journal', journalRoutes);
+app.use('/api/mood', moodRoutes);
+app.use('/api/preferences', preferencesRoutes);
 
 // 404 handler
 app.use((_req, res) => {

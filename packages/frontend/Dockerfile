@@ -21,6 +21,8 @@ RUN npm run build
 # Development stage
 FROM base AS development
 WORKDIR /app/packages/frontend
+# Create symlink to root node_modules for workspace resolution
+RUN ln -sf /app/node_modules ./node_modules
 EXPOSE 5173
 CMD ["npm", "run", "dev"]
 

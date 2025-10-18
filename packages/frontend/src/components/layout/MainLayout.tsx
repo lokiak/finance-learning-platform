@@ -22,19 +22,19 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary-50">
+    <div className="min-h-screen bg-cream-50">
       {/* Sidebar */}
       <div
         className={`
-          fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-secondary-200 transform transition-transform duration-300
+          fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-sage-200 transform transition-transform duration-300
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-secondary-200">
-            <h1 className="text-xl font-bold text-primary-600">Finance Learning</h1>
+          <div className="flex items-center justify-between h-16 px-6 border-b border-sage-200">
+            <h1 className="text-xl font-bold text-sage-600">Finance Learning</h1>
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden"
@@ -54,10 +54,10 @@ export default function MainLayout() {
                   key={item.name}
                   to={item.href}
                   className={`
-                    flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                    flex items-center px-3 py-2 text-sm font-medium rounded-soft transition-all duration-200
                     ${isActive
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-secondary-700 hover:bg-secondary-100'
+                      ? 'bg-sage-100 text-sage-700 shadow-soft'
+                      : 'text-earth-700 hover:bg-sage-50'
                     }
                   `}
                 >
@@ -71,21 +71,21 @@ export default function MainLayout() {
           </nav>
 
           {/* User section */}
-          <div className="p-4 border-t border-secondary-200">
+          <div className="p-4 border-t border-sage-200">
             <div className="flex items-center space-x-3 mb-3">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium">
+                <div className="w-10 h-10 rounded-full bg-sage-600 flex items-center justify-center text-white font-medium">
                   {user?.name.charAt(0).toUpperCase()}
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-secondary-900 truncate">{user?.name}</p>
-                <p className="text-xs text-secondary-500 truncate">{user?.email}</p>
+                <p className="text-sm font-medium text-earth-900 truncate">{user?.name}</p>
+                <p className="text-xs text-earth-500 truncate">{user?.email}</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-danger-700 bg-danger-50 rounded-lg hover:bg-danger-100 transition-colors"
+              className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-soft hover:bg-red-100 transition-all duration-200"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -99,7 +99,7 @@ export default function MainLayout() {
       {/* Main content */}
       <div className={`transition-all duration-300 ${isSidebarOpen ? 'lg:ml-64' : 'ml-0 lg:ml-64'}`}>
         {/* Top bar */}
-        <header className="sticky top-0 z-20 h-16 bg-white border-b border-secondary-200">
+        <header className="sticky top-0 z-20 h-16 bg-white border-b border-sage-200">
           <div className="flex items-center justify-between h-full px-4">
             <button
               onClick={() => setSidebarOpen(true)}

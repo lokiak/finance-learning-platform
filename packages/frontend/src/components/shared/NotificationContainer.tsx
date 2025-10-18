@@ -7,10 +7,10 @@ export default function NotificationContainer() {
     <div className="fixed top-4 right-4 z-50 space-y-2">
       {notifications.map((notification) => {
         const typeStyles = {
-          success: 'bg-success-50 border-success-500 text-success-800',
-          error: 'bg-danger-50 border-danger-500 text-danger-800',
-          warning: 'bg-warning-50 border-warning-500 text-warning-800',
-          info: 'bg-primary-50 border-primary-500 text-primary-800',
+          success: 'bg-moss-50 border-moss-500 text-moss-800',
+          error: 'bg-red-50 border-red-500 text-red-800',
+          warning: 'bg-cream-100 border-cream-600 text-cream-900',
+          info: 'bg-sky-50 border-sky-500 text-sky-800',
         };
 
         const icons = {
@@ -40,7 +40,7 @@ export default function NotificationContainer() {
           <div
             key={notification.id}
             className={`
-              flex items-start space-x-3 p-4 rounded-lg border-l-4 shadow-lg
+              flex items-start space-x-3 p-4 rounded-gentle border-l-4 shadow-floating
               min-w-[300px] max-w-md
               animate-in slide-in-from-right duration-300
               ${typeStyles[notification.type]}

@@ -11,8 +11,8 @@ export default function Card({ children, className = '', hover = false, onClick 
   return (
     <div
       className={`
-        bg-white rounded-lg shadow-soft border border-secondary-200 p-6
-        ${hover ? 'transition-shadow hover:shadow-lg cursor-pointer' : ''}
+        card-peaceful p-6
+        ${hover ? 'hover:shadow-gentle hover:border-sage-200 cursor-pointer' : ''}
         ${onClick ? 'cursor-pointer' : ''}
         ${className}
       `}

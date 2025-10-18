@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, PromptCategory, TriggerType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -527,6 +527,92 @@ const modules = [
   }
 ];
 
+const journalPrompts = [
+  // Money Mindset Prompts
+  { prompt_text: 'What are three beliefs about money that you learned growing up?', category: PromptCategory.money_mindset, trigger_type: TriggerType.onboarding, uses_name: false, uses_goal_data: false, priority: 10 },
+  { prompt_text: 'What does financial freedom mean to you personally?', category: PromptCategory.money_mindset, trigger_type: TriggerType.onboarding, uses_name: false, uses_goal_data: false, priority: 9 },
+  { prompt_text: 'Describe your relationship with money in three words. Why did you choose those words?', category: PromptCategory.money_mindset, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What money decision are you most proud of? What made it successful?', category: PromptCategory.money_mindset, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'When do you feel most anxious about money? What triggers that anxiety?', category: PromptCategory.money_mindset, trigger_type: TriggerType.mood_low, uses_name: false, uses_goal_data: false, priority: 8 },
+  { prompt_text: 'What would you do differently with money if you had no fear?', category: PromptCategory.money_mindset, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+  { prompt_text: 'How has your relationship with money changed in the past year?', category: PromptCategory.money_mindset, trigger_type: TriggerType.time_based, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'What money habit would you like to break? What would replace it?', category: PromptCategory.money_mindset, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'Who has positively influenced your financial thinking? What did they teach you?', category: PromptCategory.money_mindset, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+  { prompt_text: 'What money belief served you in the past but no longer serves you now?', category: PromptCategory.money_mindset, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+
+  // Goal Setting Prompts
+  { prompt_text: 'Fast forward 5 years. You\'ve achieved your financial goals. Describe a typical day in your life.', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 10 },
+  { prompt_text: 'Why is this goal important to you right now?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 9 },
+  { prompt_text: 'What will achieving this goal make possible for you?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 8 },
+  { prompt_text: 'What obstacles might prevent you from reaching this goal? How will you overcome them?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 7 },
+  { prompt_text: 'Break down your big goal into 3-5 smaller milestones. What\'s the first step?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 8 },
+  { prompt_text: 'Who can support you in achieving this goal? How will you ask for their support?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What sacrifices or trade-offs will this goal require? Are you willing to make them?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 6 },
+  { prompt_text: 'If you achieve only 50% of this goal, what would that look like? Would that still be valuable?', category: PromptCategory.goal_setting, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: true, priority: 4 },
+  { prompt_text: 'What new skills or knowledge do you need to achieve this goal?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 6 },
+  { prompt_text: 'How will you celebrate when you reach this goal?', category: PromptCategory.goal_setting, trigger_type: TriggerType.goal_created, uses_name: false, uses_goal_data: true, priority: 7 },
+
+  // Challenges Prompts
+  { prompt_text: 'What financial challenge are you facing right now? What have you already tried?', category: PromptCategory.challenges, trigger_type: TriggerType.mood_low, uses_name: false, uses_goal_data: false, priority: 9 },
+  { prompt_text: 'Describe a financial setback you experienced. What did you learn from it?', category: PromptCategory.challenges, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What money mistake do you keep making? Why do you think that pattern continues?', category: PromptCategory.challenges, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'If a friend faced your current financial challenge, what advice would you give them?', category: PromptCategory.challenges, trigger_type: TriggerType.mood_low, uses_name: false, uses_goal_data: false, priority: 7 },
+  { prompt_text: 'What\'s one small thing you could do today to feel more in control of your finances?', category: PromptCategory.challenges, trigger_type: TriggerType.mood_low, uses_name: false, uses_goal_data: false, priority: 8 },
+  { prompt_text: 'When you overcome your current financial challenge, what will be possible?', category: PromptCategory.challenges, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What support or resources could help you with this challenge?', category: PromptCategory.challenges, trigger_type: TriggerType.mood_low, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'How have you successfully overcome financial challenges in the past?', category: PromptCategory.challenges, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What would "good enough" progress look like on this challenge?', category: PromptCategory.challenges, trigger_type: TriggerType.mood_low, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'What\'s the worst that could happen? What\'s the best that could happen?', category: PromptCategory.challenges, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+
+  // Gratitude Prompts
+  { prompt_text: 'What are you grateful for financially today, even if it\'s small?', category: PromptCategory.gratitude, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 7 },
+  { prompt_text: 'What financial resource or opportunity do you have now that you didn\'t have a year ago?', category: PromptCategory.gratitude, trigger_type: TriggerType.time_based, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'Who has helped you financially or taught you about money? How can you thank them?', category: PromptCategory.gratitude, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What bill or expense are you grateful you can afford?', category: PromptCategory.gratitude, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What money decision from your past self are you thankful for today?', category: PromptCategory.gratitude, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'What abundance exists in your life beyond money?', category: PromptCategory.gratitude, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+  { prompt_text: 'How has learning about finance improved your life?', category: PromptCategory.gratitude, trigger_type: TriggerType.module_complete, uses_name: false, uses_goal_data: false, priority: 7 },
+  { prompt_text: 'What financial freedom, even if small, do you already have?', category: PromptCategory.gratitude, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What low-cost or free thing brought you joy this week?', category: PromptCategory.gratitude, trigger_type: TriggerType.time_based, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'How have your financial challenges made you stronger or wiser?', category: PromptCategory.gratitude, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+
+  // Future Vision Prompts
+  { prompt_text: 'Imagine your ideal financial life 10 years from now. Describe it in vivid detail.', category: PromptCategory.future_vision, trigger_type: TriggerType.onboarding, uses_name: false, uses_goal_data: false, priority: 9 },
+  { prompt_text: 'What does "enough" money mean to you? How will you know when you have enough?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'If money was no object, how would you spend your time?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What legacy do you want to leave through your financial decisions?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+  { prompt_text: 'Fast forward to retirement. What do you want to remember about your financial journey?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What financial security would allow you to take your biggest career risk?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+  { prompt_text: 'Describe your dream home. What makes it perfect for you?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'If you achieved financial independence, what would your typical week look like?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'What experiences do you want to have in the next 5 years? How will you fund them?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'How do you want to support causes or people you care about financially?', category: PromptCategory.future_vision, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 4 },
+
+  // Reflection Prompts
+  { prompt_text: 'What surprised you most in this module?', category: PromptCategory.reflection, trigger_type: TriggerType.module_complete, uses_name: false, uses_goal_data: false, priority: 10 },
+  { prompt_text: 'What\'s your biggest takeaway from this module? How will you apply it?', category: PromptCategory.reflection, trigger_type: TriggerType.module_complete, uses_name: false, uses_goal_data: false, priority: 10 },
+  { prompt_text: 'What questions do you still have after completing this module?', category: PromptCategory.reflection, trigger_type: TriggerType.module_complete, uses_name: false, uses_goal_data: false, priority: 8 },
+  { prompt_text: 'Reflect on your progress this week. What are you proud of?', category: PromptCategory.reflection, trigger_type: TriggerType.streak, uses_name: false, uses_goal_data: false, priority: 9 },
+  { prompt_text: 'What financial habit have you developed or strengthened recently?', category: PromptCategory.reflection, trigger_type: TriggerType.time_based, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'How has your financial confidence changed since you started this journey?', category: PromptCategory.reflection, trigger_type: TriggerType.time_based, uses_name: false, uses_goal_data: false, priority: 7 },
+  { prompt_text: 'What would you tell your past self about money?', category: PromptCategory.reflection, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 5 },
+  { prompt_text: 'What money decision are you currently wrestling with? What are the pros and cons?', category: PromptCategory.reflection, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'How do you feel about your finances right now? What\'s driving that feeling?', category: PromptCategory.reflection, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'What financial concept finally "clicked" for you? Why did it click?', category: PromptCategory.reflection, trigger_type: TriggerType.module_complete, uses_name: false, uses_goal_data: false, priority: 7 },
+
+  // Celebration Prompts
+  { prompt_text: 'You\'ve reached a milestone! What does this achievement mean to you?', category: PromptCategory.celebration, trigger_type: TriggerType.goal_milestone, uses_name: false, uses_goal_data: true, priority: 10 },
+  { prompt_text: 'Celebrate this win! How did you make this happen?', category: PromptCategory.celebration, trigger_type: TriggerType.goal_milestone, uses_name: false, uses_goal_data: true, priority: 9 },
+  { prompt_text: 'What small financial win can you celebrate today?', category: PromptCategory.celebration, trigger_type: TriggerType.random, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'You\'ve completed a module! What will you do differently because of what you learned?', category: PromptCategory.celebration, trigger_type: TriggerType.module_complete, uses_name: false, uses_goal_data: false, priority: 9 },
+  { prompt_text: 'You\'re on a streak! What\'s motivating you to keep going?', category: PromptCategory.celebration, trigger_type: TriggerType.streak, uses_name: false, uses_goal_data: false, priority: 8 },
+  { prompt_text: 'How will you celebrate this financial milestone? You\'ve earned it!', category: PromptCategory.celebration, trigger_type: TriggerType.goal_milestone, uses_name: false, uses_goal_data: true, priority: 8 },
+  { prompt_text: 'What does this progress tell you about yourself?', category: PromptCategory.celebration, trigger_type: TriggerType.streak, uses_name: false, uses_goal_data: false, priority: 7 },
+  { prompt_text: 'Who would be proud of you for this achievement? How would they celebrate with you?', category: PromptCategory.celebration, trigger_type: TriggerType.goal_milestone, uses_name: false, uses_goal_data: false, priority: 6 },
+  { prompt_text: 'What obstacle did you overcome to get here? How does it feel?', category: PromptCategory.celebration, trigger_type: TriggerType.goal_milestone, uses_name: false, uses_goal_data: true, priority: 7 },
+  { prompt_text: 'Looking back at where you started, how far have you come?', category: PromptCategory.celebration, trigger_type: TriggerType.streak, uses_name: false, uses_goal_data: false, priority: 7 },
+];
+
 async function main() {
   console.log('Starting database seed...');
 
@@ -534,6 +620,9 @@ async function main() {
   console.log('Clearing existing module data...');
   await prisma.moduleContent.deleteMany();
   await prisma.module.deleteMany();
+
+  console.log('Clearing existing journal prompts...');
+  await prisma.journalPrompt.deleteMany();
 
   // Create modules and content
   for (const moduleData of modules) {
@@ -556,8 +645,20 @@ async function main() {
     }
   }
 
+  // Create journal prompts
+  console.log('Seeding journal prompts...');
+  for (const promptData of journalPrompts) {
+    await prisma.journalPrompt.create({
+      data: {
+        ...promptData,
+        is_active: true,
+      },
+    });
+  }
+
   console.log('Seed completed successfully!');
   console.log(`Created ${modules.length} modules with content`);
+  console.log(`Created ${journalPrompts.length} journal prompts`);
 }
 
 main()
