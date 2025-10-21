@@ -16,6 +16,10 @@ import ModuleView from '@/pages/ModuleView';
 import Calculators from '@/pages/Calculators';
 import Goals from '@/pages/Goals';
 import Profile from '@/pages/Profile';
+import Journal from '@/pages/Journal';
+import JournalNew from '@/pages/JournalNew';
+import JournalPrompts from '@/pages/JournalPrompts';
+import Mood from '@/pages/Mood';
 
 // Components
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -62,6 +66,10 @@ function App() {
             <Route path="/calculators" element={<Calculators />} />
             <Route path="/goals" element={<Goals />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/mood" element={<Mood />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/journal/new" element={<JournalNew />} />
+            <Route path="/journal/prompts" element={<JournalPrompts />} />
           </Route>
 
           {/* Default redirect */}

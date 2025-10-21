@@ -250,8 +250,14 @@ class ApiClient {
   async getJournalPrompts(params?: {
     category?: string;
     trigger_type?: string;
+    limit?: number;
   }) {
     const response = await this.client.get('/journal/prompts', { params });
+    return response.data;
+  }
+
+  async getTodaysPrompt() {
+    const response = await this.client.get('/journal/prompts/today');
     return response.data;
   }
 

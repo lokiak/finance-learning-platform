@@ -1,4 +1,6 @@
-import { PrismaClient, PromptCategory, TriggerType } from '@prisma/client';
+import { PrismaClient, PromptCategory, TriggerType, EntryType, GoalStatus } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -613,6 +615,172 @@ const journalPrompts = [
   { prompt_text: 'Looking back at where you started, how far have you come?', category: PromptCategory.celebration, trigger_type: TriggerType.streak, uses_name: false, uses_goal_data: false, priority: 7 },
 ];
 
+// Helper function to create test user with realistic data
+async function createTestUser() {
+  const hashedPassword = await bcrypt.hash('password123', 10);
+
+  return await prisma.user.create({
+    data: {
+      email: 'test@example.com',
+      name: 'Alex Morgan',
+      password_hash: hashedPassword,
+    },
+  });
+}
+
+// Helper function to seed journal entries with Faker
+async function seedJournalEntries(userId: string, promptIds: string[], count: number = 15) {
+  const entries = [];
+
+  for (let i = 0; i < count; i++) {
+    // Random date in the past 45 days
+    const createdDate = faker.date.recent({ days: 45 });
+
+    // Random entry type
+    const entryTypes = [EntryType.free_form, EntryType.prompted, EntryType.module_reflection, EntryType.daily_checkin];
+    const entryType = faker.helpers.arrayElement(entryTypes);
+
+    // Generate realistic journal content
+    const paragraphs = faker.helpers.arrayElements([
+      "I've been thinking a lot about my financial goals lately. It's overwhelming sometimes, but I know I need to stay focused on the bigger picture.",
+      "Today I finally set up my emergency fund! It feels great to have that safety net in place. Small steps add up.",
+      "Tracking my expenses this week was eye-opening. I didn't realize how much I was spending on eating out. Time to meal prep more!",
+      "I'm proud of myself for sticking to my budget this month. It wasn't easy, especially with unexpected car repairs, but I made it work.",
+      "Debt payoff is slow, but I can see progress. Every payment brings me closer to freedom. Just need to keep the momentum going.",
+      "Had an honest conversation with my partner about money today. It was uncomfortable but necessary. We're on the same page now.",
+      "Completed another module today. The investing concepts are starting to make sense. Compound interest is powerful!",
+      "Feeling stressed about money again. Bills are piling up and I'm worried about making ends meet. Need to breathe and focus on what I can control.",
+      "Celebrated a small win today - paid off my smallest credit card! The snowball method really works. Motivation is high right now.",
+      "Reflecting on how far I've come. Six months ago I had no idea what my net worth was. Now I track it monthly. Growth isn't just financial.",
+    ], { min: 2, max: 4 });
+
+    entries.push({
+      user_id: userId,
+      entry_type: entryType,
+      title: faker.helpers.maybe(() => faker.lorem.sentence({ min: 3, max: 6 }), { probability: 0.6 }),
+      content: {
+        type: 'doc',
+        content: paragraphs.map((text: string) => ({
+          type: 'paragraph',
+          content: [{ type: 'text', text }]
+        }))
+      },
+      mood: faker.number.int({ min: 1, max: 5 }),
+      stress_level: faker.number.int({ min: 1, max: 10 }),
+      word_count: paragraphs.join(' ').split(' ').length,
+      tags: faker.helpers.maybe(() =>
+        faker.helpers.arrayElements(
+          ['debt', 'savings', 'investing', 'goals', 'stress', 'progress', 'budgeting', 'emergency-fund'],
+          { min: 1, max: 3 }
+        ), { probability: 0.7 }
+      ) || [],
+      prompt_id: entryType === EntryType.prompted ? faker.helpers.arrayElement(promptIds) : null,
+      created_at: createdDate,
+      updated_at: createdDate,
+    });
+  }
+
+  await prisma.journalEntry.createMany({ data: entries });
+  console.log(`  Created ${entries.length} journal entries`);
+}
+
+// Helper function to seed mood entries
+async function seedMoodEntries(userId: string, days: number = 20) {
+  const moods = [];
+
+  for (let i = 0; i < days; i++) {
+    const daysAgo = days - i;
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    date.setHours(faker.number.int({ min: 8, max: 22 }), faker.number.int({ min: 0, max: 59 }), 0, 0);
+
+    // Gradually improving mood trend with some variance
+    const baseMood = Math.min(5, Math.max(1, Math.floor(2.5 + (i / days) * 1.5 + faker.number.float({ min: -0.5, max: 0.5 }))));
+
+    moods.push({
+      user_id: userId,
+      overall_mood: baseMood,
+      financial_stress: faker.number.int({ min: Math.max(1, 11 - baseMood * 2), max: 10 }),
+      energy_level: faker.number.int({ min: baseMood - 1, max: baseMood + 1 }),
+      journaled_today: faker.datatype.boolean({ probability: 0.7 }),
+      completed_module: faker.datatype.boolean({ probability: 0.3 }),
+      worked_on_goal: faker.datatype.boolean({ probability: 0.5 }),
+      note: faker.helpers.maybe(() =>
+        faker.helpers.arrayElement([
+          "Feeling motivated today",
+          "A bit overwhelmed but managing",
+          "Making progress, one step at a time",
+          "Proud of my consistency",
+          "Taking it easy today",
+        ])
+      ),
+      created_at: date,
+    });
+  }
+
+  await prisma.moodEntry.createMany({ data: moods });
+  console.log(`  Created ${moods.length} mood entries`);
+}
+
+// Helper function to seed goals
+async function seedGoals(userId: string) {
+  const goals = [
+    {
+      user_id: userId,
+      title: 'Build $1,000 Emergency Fund',
+      description: 'Save enough to cover unexpected expenses without going into debt',
+      goal_type: 'savings',
+      target_amount: 1000,
+      current_progress: 650,
+      target_date: new Date(new Date().setMonth(new Date().getMonth() + 3)),
+      status: GoalStatus.active,
+      milestones: [
+        { amount: 250, label: 'First milestone', achieved: true, achieved_date: new Date(new Date().setMonth(new Date().getMonth() - 2)) },
+        { amount: 500, label: 'Halfway there', achieved: true, achieved_date: new Date(new Date().setMonth(new Date().getMonth() - 1)) },
+        { amount: 750, label: 'Almost done', achieved: false },
+        { amount: 1000, label: 'Goal complete!', achieved: false },
+      ],
+    },
+    {
+      user_id: userId,
+      title: 'Pay Off Credit Card Debt',
+      description: 'Eliminate all credit card balances using the debt avalanche method',
+      goal_type: 'debt_payoff',
+      target_amount: 3500,
+      current_progress: 1200,
+      target_date: new Date(new Date().setMonth(new Date().getMonth() + 8)),
+      status: GoalStatus.active,
+      milestones: [
+        { amount: 875, label: '25% paid off', achieved: true, achieved_date: new Date(new Date().setMonth(new Date().getMonth() - 1)) },
+        { amount: 1750, label: 'Halfway', achieved: false },
+        { amount: 2625, label: '75% done', achieved: false },
+        { amount: 3500, label: 'Debt free!', achieved: false },
+      ],
+    },
+    {
+      user_id: userId,
+      title: 'Start Investing for Retirement',
+      description: 'Open a Roth IRA and contribute $500 to begin building wealth',
+      goal_type: 'investment',
+      target_amount: 500,
+      current_progress: 0,
+      target_date: new Date(new Date().setMonth(new Date().getMonth() + 6)),
+      status: GoalStatus.active,
+      milestones: [
+        { amount: 100, label: 'Account opened', achieved: false },
+        { amount: 250, label: 'First contributions', achieved: false },
+        { amount: 500, label: 'Goal reached!', achieved: false },
+      ],
+    },
+  ];
+
+  for (const goalData of goals) {
+    await prisma.userGoal.create({ data: goalData });
+  }
+
+  console.log(`  Created ${goals.length} goals`);
+}
+
 async function main() {
   console.log('Starting database seed...');
 
@@ -647,18 +815,47 @@ async function main() {
 
   // Create journal prompts
   console.log('Seeding journal prompts...');
+  const createdPrompts = [];
   for (const promptData of journalPrompts) {
-    await prisma.journalPrompt.create({
+    const prompt = await prisma.journalPrompt.create({
       data: {
         ...promptData,
         is_active: true,
       },
     });
+    createdPrompts.push(prompt);
   }
 
-  console.log('Seed completed successfully!');
-  console.log(`Created ${modules.length} modules with content`);
-  console.log(`Created ${journalPrompts.length} journal prompts`);
+  // Create test user and seed realistic test data
+  console.log('\nSeeding test user and realistic data...');
+
+  // Check if test user exists
+  let testUser = await prisma.user.findUnique({ where: { email: 'test@example.com' } });
+
+  if (!testUser) {
+    console.log('Creating test user (test@example.com / password123)...');
+    testUser = await createTestUser();
+  } else {
+    console.log('Test user already exists, using existing user...');
+  }
+
+  // Seed test data for the test user
+  console.log('Seeding journal entries...');
+  await seedJournalEntries(testUser.id, createdPrompts.map(p => p.id), 15);
+
+  console.log('Seeding mood tracking data...');
+  await seedMoodEntries(testUser.id, 20);
+
+  console.log('Seeding goals...');
+  await seedGoals(testUser.id);
+
+  console.log('\n✅ Seed completed successfully!');
+  console.log(`📚 Created ${modules.length} modules with content`);
+  console.log(`💭 Created ${journalPrompts.length} journal prompts`);
+  console.log(`👤 Test user: test@example.com / password123`);
+  console.log(`📔 Created 15 journal entries with realistic content`);
+  console.log(`😊 Created 20 mood entries (past 20 days with improving trend)`);
+  console.log(`🎯 Created 3 goals with progress tracking`);
 }
 
 main()

@@ -7,8 +7,10 @@ import ProgressBar from '@/components/shared/ProgressBar';
 import Badge from '@/components/shared/Badge';
 import { MoodSelector } from '@/components/mood';
 import { SoundscapePlayer } from '@/components/soundscape';
+import TodaysPrompt from '@/components/dashboard/TodaysPrompt';
+import TodaysFocus from '@/components/dashboard/TodaysFocus';
 import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { motion } from 'framer-motion';
 
 export default function Dashboard() {
@@ -26,16 +28,15 @@ export default function Dashboard() {
     queryFn: () => api.getProgressSummary(),
   });
 
-  // TODO: Add journal stats and recent entries when API methods are available
-  // const { data: journalStats } = useQuery({
-  //   queryKey: ['journal', 'stats'],
-  //   queryFn: () => api.getJournalStats(),
-  // });
+  const { data: journalStats } = useQuery({
+    queryKey: ['journal', 'stats'],
+    queryFn: () => api.getJournalStats(),
+  });
 
-  // const { data: recentEntries } = useQuery({
-  //   queryKey: ['journal', 'recent'],
-  //   queryFn: () => api.getJournalEntries({ limit: 3 }),
-  // });
+  const { data: journalEntries } = useQuery({
+    queryKey: ['journal', 'recent'],
+    queryFn: () => api.getJournalEntries({ limit: 100 }),
+  });
 
   const handleMoodSubmit = async (mood: number) => {
     setTodayMood(mood);
@@ -65,10 +66,48 @@ export default function Dashboard() {
 
   const overview = dashboardData?.overview;
   const achievements = dashboardData?.achievements || [];
-  // const recentActivity = dashboardData?.recent_activity || [];
-
-  const todaysPrompt = "What financial goal are you most excited about achieving this month?";
   const currentDate = format(new Date(), 'EEEE, MMMM d, yyyy');
+
+  // Calculate weekly stats
+  const oneWeekAgo = subDays(new Date(), 7);
+  const recentJournalEntries = journalEntries?.entries || [];
+  const weeklyJournalCount = recentJournalEntries.filter(
+    (entry: any) => new Date(entry.created_at) >= oneWeekAgo
+  ).length;
+
+  const weeklyStats = {
+    modules_completed: (progressData as any)?.completed_count || 0,
+    journal_entries: weeklyJournalCount,
+    learning_streak: journalStats?.current_streak || 0,
+  };
+
+  // Find current module (first in-progress module)
+  const currentModule = (progressData as any)?.progress?.find(
+    (p: any) => p.status === 'in_progress'
+  );
+
+  // Determine suggested action
+  let suggestedAction;
+  const daysSinceLastJournal = journalStats?.current_streak === 0 ? 7 : 0;
+  if (daysSinceLastJournal >= 3) {
+    suggestedAction = {
+      type: 'journal' as const,
+      message: "You haven't journaled in a few days. Taking a moment to reflect can help clarify your thoughts and reduce stress.",
+      link: '/journal/new',
+    };
+  } else if (!currentModule && (progressData as any)?.progress?.length === 0) {
+    suggestedAction = {
+      type: 'module' as const,
+      message: 'Start your financial learning journey with your first module.',
+      link: '/modules',
+    };
+  } else if (todayMood && todayMood <= 2) {
+    suggestedAction = {
+      type: 'breathing' as const,
+      message: "You're feeling stressed. Try a 5-minute breathing exercise to calm your mind.",
+      link: '#breathing',
+    };
+  }
 
   return (
     <div className="space-y-6 pb-12">
@@ -95,28 +134,20 @@ export default function Dashboard() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="bg-gradient-to-br from-sage-50 to-moss-50 border-sage-200">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 bg-sage-600 rounded-gentle flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-earth-900 mb-2">Today's Focus</h2>
-              <p className="text-lg text-earth-700 mb-4 italic">"{todaysPrompt}"</p>
-              <Link
-                to="/journal/new"
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-                Journal about this
-              </Link>
-            </div>
-          </div>
-        </Card>
+        <TodaysFocus
+          currentModule={currentModule}
+          weeklyStats={weeklyStats}
+          suggestedAction={suggestedAction}
+        />
+      </motion.div>
+
+      {/* Today's Journal Prompt */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.15 }}
+      >
+        <TodaysPrompt />
       </motion.div>
 
       {/* Quick Actions Grid */}

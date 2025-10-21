@@ -247,6 +247,7 @@ model UserGoal {
   target_date      DateTime?  @db.Date
   current_progress Decimal    @default(0) @db.Decimal(12, 2)
   status           GoalStatus @default(active)
+  milestones       Json?      @db.JsonB
   created_at       DateTime   @default(now())
   updated_at       DateTime   @updatedAt
 

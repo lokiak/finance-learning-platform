@@ -183,6 +183,117 @@ router.get(
   })
 );
 
+// GET /api/journal/prompts/today - Get today's personalized prompt
+router.get(
+  '/prompts/today',
+  asyncHandler(async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.userId;
+
+    // Get user's recent mood data (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [recentMoods, recentEntries] = await Promise.all([
+      prisma.moodEntry.findMany({
+        where: {
+          user_id: userId,
+          created_at: { gte: sevenDaysAgo },
+        },
+        orderBy: { created_at: 'desc' },
+        take: 7,
+      }),
+      prisma.journalEntry.findMany({
+        where: {
+          user_id: userId,
+          deleted_at: null,
+          created_at: { gte: sevenDaysAgo },
+        },
+        select: { prompt_id: true, mood: true },
+      }),
+    ]);
+
+    // Calculate average mood
+    const avgMood =
+      recentMoods.length > 0
+        ? recentMoods.reduce((sum: number, m: { overall_mood: number }) => sum + m.overall_mood, 0) /
+          recentMoods.length
+        : 3; // Default to neutral
+
+    // Get prompt IDs to exclude (recently used)
+    const usedPromptIds = recentEntries
+      .map((e: { prompt_id: string | null }) => e.prompt_id)
+      .filter((id: string | null): id is string => id !== null);
+
+    // Select category based on mood
+    let categoryPreference: string | undefined;
+    if (avgMood <= 2) {
+      // Low mood: gratitude, reflection, challenges
+      const categories = ['gratitude', 'reflection', 'challenges'];
+      categoryPreference = categories[Math.floor(Math.random() * categories.length)];
+    } else if (avgMood >= 4) {
+      // High mood: goal_setting, future_vision, celebration
+      const categories = ['goal_setting', 'future_vision', 'celebration'];
+      categoryPreference = categories[Math.floor(Math.random() * categories.length)];
+    } else {
+      // Neutral: money_mindset, reflection
+      const categories = ['money_mindset', 'reflection'];
+      categoryPreference = categories[Math.floor(Math.random() * categories.length)];
+    }
+
+    // Find a prompt
+    const where: any = {
+      is_active: true,
+      category: categoryPreference,
+    };
+
+    // Exclude recently used prompts
+    if (usedPromptIds.length > 0) {
+      where.id = { notIn: usedPromptIds };
+    }
+
+    let prompt = await prisma.journalPrompt.findFirst({
+      where,
+      orderBy: [{ priority: 'desc' }, { created_at: 'desc' }],
+    });
+
+    // If no prompt found with preferences, get any active prompt
+    if (!prompt) {
+      prompt = await prisma.journalPrompt.findFirst({
+        where: {
+          is_active: true,
+          ...(usedPromptIds.length > 0 && { id: { notIn: usedPromptIds } }),
+        },
+        orderBy: [{ priority: 'desc' }, { created_at: 'desc' }],
+      });
+    }
+
+    // If still no prompt, get any prompt
+    if (!prompt) {
+      prompt = await prisma.journalPrompt.findFirst({
+        where: { is_active: true },
+        orderBy: [{ priority: 'desc' }, { created_at: 'desc' }],
+      });
+    }
+
+    if (!prompt) {
+      return res.status(404).json({ error: 'No prompts available' });
+    }
+
+    // Add personalization context
+    const promptWithContext = {
+      ...prompt,
+      trigger_reason:
+        avgMood <= 2
+          ? "We noticed you've been feeling stressed. This prompt can help you reflect and find clarity."
+          : avgMood >= 4
+          ? "You've been feeling great! Let's harness that positive energy."
+          : undefined,
+    };
+
+    return res.json({ prompt: promptWithContext });
+  })
+);
+
 // GET /api/journal/prompts - Get journal prompts (today's or suggested)
 router.get(
   '/prompts',

@@ -33,6 +33,7 @@ services:
       - "3000:3000"
     volumes:
       - ./packages/backend/src:/app/packages/backend/src
+      - ./packages/backend/prisma:/app/packages/backend/prisma
       - ./packages/shared/src:/app/packages/shared/src
       - ./packages/shared/dist:/app/packages/shared/dist
     depends_on:

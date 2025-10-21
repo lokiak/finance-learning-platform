@@ -1,7 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { JournalEntry, EntryType } from '@finance-platform/shared';
+import { JournalEntry } from '@finance-platform/shared';
 import JournalEntryCard from './JournalEntryCard';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Temporary local definitions until shared package import is fixed
+enum EntryType {
+  FREE_FORM = 'free_form',
+  MODULE_REFLECTION = 'module_reflection',
+  GOAL = 'goal',
+  DAILY_CHECKIN = 'daily_checkin',
+  PROMPTED = 'prompted',
+}
 
 interface JournalListProps {
   entries: JournalEntry[];

@@ -1,6 +1,25 @@
 import React from 'react';
-import { JournalEntry, MOOD_ICONS, MoodLevel, EntryType } from '@finance-platform/shared';
+import { JournalEntry } from '@finance-platform/shared';
 import { motion } from 'framer-motion';
+
+// Temporary local definitions until shared package import is fixed
+const MOOD_ICONS = {
+  5: { emoji: '😌', label: 'Peaceful', color: 'green' },
+  4: { emoji: '🙂', label: 'Calm', color: 'blue' },
+  3: { emoji: '😐', label: 'Neutral', color: 'gray' },
+  2: { emoji: '😟', label: 'Anxious', color: 'orange' },
+  1: { emoji: '😰', label: 'Stressed', color: 'red' },
+} as const;
+
+type MoodLevel = keyof typeof MOOD_ICONS;
+
+enum EntryType {
+  FREE_FORM = 'free_form',
+  MODULE_REFLECTION = 'module_reflection',
+  GOAL = 'goal',
+  DAILY_CHECKIN = 'daily_checkin',
+  PROMPTED = 'prompted',
+}
 
 interface JournalEntryCardProps {
   entry: JournalEntry;
