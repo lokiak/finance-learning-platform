@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   profile: null,
   token: localStorage.getItem('auth_token'),
   isAuthenticated: !!localStorage.getItem('auth_token'),
-  isLoading: false,
+  isLoading: !!localStorage.getItem('auth_token'), // Start as loading if we have a token
   error: null,
 
   login: async (email, password) => {

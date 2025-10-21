@@ -43,9 +43,17 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
+        // Only auto-redirect on 401 if NOT on initial auth check endpoints
         if (error.response?.status === 401) {
-          localStorage.removeItem('auth_token');
-          window.location.href = '/login';
+          const url = error.config?.url || '';
+          // Don't auto-redirect for auth validation endpoints - let the auth store handle it
+          if (!url.includes('/auth/me') && !url.includes('/auth/profile')) {
+            localStorage.removeItem('auth_token');
+            // Only redirect if we're not already on the login page
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
+          }
         }
         return Promise.reject(error);
       }

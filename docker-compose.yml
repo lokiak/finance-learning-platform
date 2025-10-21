@@ -51,20 +51,35 @@ services:
     container_name: finance-platform-web
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+      # Optimize Node.js for limited resources
+      NODE_OPTIONS: "--max-old-space-size=512 --max-semi-space-size=64"
+      # Reduce file watching overhead
+      CHOKIDAR_USEPOLLING: "false"
+      CHOKIDAR_INTERVAL: "1000"
     ports:
       - "5173:5173"
     volumes:
-      - ./packages/frontend/src:/app/packages/frontend/src
-      - ./packages/shared/src:/app/packages/shared/src
-      - ./packages/shared/dist:/app/packages/shared/dist
+      # Use consistent caching for better performance
+      - frontend_cache:/app/packages/frontend/node_modules/.vite
+      - ./packages/frontend/src:/app/packages/frontend/src:consistent
+      - ./packages/shared/src:/app/packages/shared/src:consistent
+      - ./packages/shared/dist:/app/packages/shared/dist:consistent
     depends_on:
       - backend
     command: npm run dev --workspace=@finance-platform/frontend
     networks:
       - finance-network
+    # Add resource limits to prevent memory issues
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
 
 volumes:
   postgres_data:
+  frontend_cache:
 
 networks:
   finance-network:
