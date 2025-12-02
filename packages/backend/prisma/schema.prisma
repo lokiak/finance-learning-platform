@@ -79,6 +79,12 @@ enum Season {
   winter
 }
 
+enum ReflectionRequired {
+  full
+  hybrid
+  none
+}
+
 // User Models
 model User {
   id                String      @id @default(uuid())
@@ -102,6 +108,18 @@ model User {
   mood_entries      MoodEntry[]
   preferences       UserPreferences?
   journaling_streak JournalingStreak?
+
+  // Educational Enhancement Relations
+  learning_performances      LearningPerformance[]
+  learning_style             LearningStyle?
+  concept_masteries          ConceptMastery[]
+  stress_predictions         StressPrediction[]
+  learning_interventions     LearningIntervention[]
+  module_readiness           ModuleReadiness[]
+  reflective_thinking_processes ReflectiveThinkingProcess[]
+  reflective_hypotheses       ReflectiveHypothesis[]
+  habits_of_mind             HabitsOfMind[]
+  language_activities        LanguageActivity[]
 
   @@index([email])
   @@map("users")
@@ -128,15 +146,16 @@ model UserProfile {
 
 // Module Models
 model Module {
-  id                  String          @id @default(uuid())
+  id                  String            @id @default(uuid())
   phase_number        Int
   module_number       Int
-  title               String          @db.VarChar(255)
-  description         String?         @db.Text
+  title               String            @db.VarChar(255)
+  description         String?           @db.Text
   estimated_duration  Int?
   order_index         Int
   prerequisites       String[]
-  created_at          DateTime        @default(now())
+  reflection_required ReflectionRequired @default(none)
+  created_at          DateTime          @default(now())
 
   // Relations
   content         ModuleContent[]
@@ -145,9 +164,19 @@ model Module {
   conversations   AIConversation[]
   journal_entries JournalEntry[]
 
+  // Educational Enhancement Relations
+  learning_performances      LearningPerformance[]
+  stress_predictions         StressPrediction[]
+  learning_interventions     LearningIntervention[]
+  module_readiness           ModuleReadiness[]
+  reflective_thinking_processes ReflectiveThinkingProcess[]
+  habits_of_mind             HabitsOfMind[]
+  language_activities        LanguageActivity[]
+
   @@unique([phase_number, module_number])
   @@index([phase_number])
   @@index([order_index])
+  @@index([reflection_required])
   @@map("modules")
 }
 
@@ -183,6 +212,17 @@ model UserProgress {
   time_spent_minutes   Int            @default(0)
   created_at           DateTime       @default(now())
   updated_at           DateTime       @updatedAt
+
+  // New Adaptive Learning Fields
+  learning_style_detected Boolean     @default(false)
+  adaptive_path_taken     String?     @db.VarChar(50) // 'fast' | 'standard' | 'thorough' | 'remedial'
+  mastery_level           Decimal?    @db.Decimal(5, 2) // 0-100
+  readiness_score         Decimal?    @db.Decimal(5, 2) // 0-100
+
+  // Performance Tracking
+  average_time_per_section Int?
+  error_rate              Decimal?    @db.Decimal(5, 2)
+  engagement_score        Decimal?    @db.Decimal(5, 2)
 
   // Relations
   user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -446,4 +486,346 @@ model JournalingStreak {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("journaling_streaks")
+}
+
+// Educational Enhancement Models
+
+model LearningPerformance {
+  id                    String   @id @default(uuid())
+  user_id               String
+  module_id             String
+  section_id            String?
+  concept_id            String?
+
+  // Performance Metrics
+  time_spent_seconds    Int
+  attempts              Int       @default(1)
+  assessment_score     Decimal?  @db.Decimal(5, 2)
+  error_count           Int       @default(0)
+  error_patterns        Json?     // Array of error types
+  completion_status     String   // 'completed' | 'abandoned' | 'in_progress'
+
+  // Learning Indicators
+  notes_taken           Boolean  @default(false)
+  content_reviewed      Int      @default(0) // Number of times reviewed
+  interactive_engaged   Boolean  @default(false)
+
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module                Module   @relation(fields: [module_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, module_id])
+  @@index([user_id, created_at])
+  @@index([concept_id])
+  @@map("learning_performance")
+}
+
+model LearningStyle {
+  id                    String   @id @default(uuid())
+  user_id               String   @unique
+
+  // Detected Preferences
+  visual_preference     Int      @default(50) // 0-100
+  textual_preference    Int      @default(50)
+  interactive_preference Int     @default(50)
+  pace_preference       String   @default("moderate") @db.VarChar(20) // 'fast' | 'moderate' | 'thorough'
+
+  // Behavioral Patterns
+  preferred_time_of_day String?  @db.VarChar(50)
+  average_session_length Int?     // minutes
+  review_frequency      String   @default("medium") @db.VarChar(20) // 'high' | 'medium' | 'low'
+
+  // Detection Method
+  detection_method      String   @default("behavioral") @db.VarChar(20) // 'behavioral' | 'explicit'
+  confidence            Decimal  @default(0.5) @db.Decimal(3, 2) // 0-1
+
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("learning_style")
+}
+
+model ConceptMastery {
+  id                    String   @id @default(uuid())
+  user_id               String
+  concept_id            String
+
+  // Mastery Tracking
+  mastery_level         Decimal  @default(0) @db.Decimal(5, 2) // 0-100
+  assessment_history    Json     // Array of assessment scores
+  last_assessed         DateTime?
+  next_review_date      DateTime?
+
+  // Spaced Repetition
+  spaced_interval_days  Int      @default(1)
+  review_count          Int      @default(0)
+
+  // Mastery Status
+  status                String   @default("not_started") @db.VarChar(50) // 'not_started' | 'learning' | 'mastered' | 'needs_review'
+
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, concept_id])
+  @@index([user_id, status])
+  @@index([next_review_date])
+  @@map("concept_mastery")
+}
+
+model StressPrediction {
+  id                    String   @id @default(uuid())
+  user_id               String
+  module_id             String?
+
+  // Prediction Data
+  predicted_stress_level Int     // 1-10
+  confidence            Decimal  @db.Decimal(3, 2) // 0-1
+  factors               Json     // Prediction factors
+
+  // Actual Outcome (for model improvement)
+  actual_stress_level   Int?
+  prediction_accuracy   Decimal? @db.Decimal(3, 2)
+
+  // Recommendations
+  recommendations       Json     // Array of recommendations
+
+  created_at            DateTime @default(now())
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module                Module?  @relation(fields: [module_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, created_at])
+  @@map("stress_predictions")
+}
+
+model LearningIntervention {
+  id                    String   @id @default(uuid())
+  user_id               String
+  intervention_type     String   @db.VarChar(50) // 'hint' | 'encouragement' | 'break' | 'celebration' | 'remediation'
+
+  // Context
+  module_id             String?
+  section_id            String?
+  trigger_reason        String   @db.VarChar(255)
+  trigger_conditions    Json
+
+  // Intervention Data
+  content               Json     // Intervention-specific content
+  displayed             Boolean  @default(false)
+  acknowledged          Boolean  @default(false)
+
+  // Effectiveness
+  user_response         String?  @db.VarChar(50) // 'helpful' | 'not_helpful' | 'dismissed'
+  outcome               Json?    // Result of intervention
+
+  created_at            DateTime @default(now())
+  displayed_at          DateTime?
+  acknowledged_at       DateTime?
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module                Module?  @relation(fields: [module_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, created_at])
+  @@index([intervention_type])
+  @@map("learning_interventions")
+}
+
+model ModuleReadiness {
+  id                    String   @id @default(uuid())
+  user_id               String
+  module_id             String
+
+  // Readiness Assessment
+  prerequisite_status   Json     // Status of each prerequisite
+  emotional_readiness   String   @db.VarChar(50) // 'optimal' | 'good' | 'moderate' | 'poor'
+  time_available        Int?     // minutes
+
+  // Recommendations
+  can_proceed           Boolean
+  recommendations       Json     // Array of recommendations
+  optimal_timing        String?  @db.VarChar(255)
+
+  assessed_at           DateTime @default(now())
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module                Module   @relation(fields: [module_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, module_id])
+  @@index([user_id, can_proceed])
+  @@map("module_readiness")
+}
+
+model ReflectiveThinkingProcess {
+  id                    String   @id @default(uuid())
+  user_id               String
+  module_id             String
+  section_id            String?
+
+  // Step 1: Felt Difficulty
+  problematic_situation Json     // ProblematicSituation data
+  user_reaction         String?  @db.VarChar(50) // 'surprised' | 'confused' | 'contradicted' | 'curious'
+  engagement_level      Int?     // 1-10
+
+  // Step 2: Problem Definition
+  initial_problem       String?  @db.Text
+  refined_problem       String?  @db.Text
+  problem_definition_complete Boolean @default(false)
+
+  // Step 3: Hypothesis Generation
+  user_hypotheses       Json     // Array of user-generated hypotheses
+  alternative_hypotheses Json?   // System-suggested alternatives
+  selected_hypothesis    String?  @db.Text
+
+  // Step 4: Reasoning
+  evidence_gathered     Json?    // Sources and analysis
+  consequence_analysis  Json?    // If-then reasoning
+  logical_reasoning     String?  @db.Text
+
+  // Step 5: Testing
+  action_plan           String?  @db.Text
+  calculator_used       String?  @db.VarChar(100)
+  real_world_applied    Boolean  @default(false)
+  test_results          Json?    // Results of testing
+  reflection_on_results String?  @db.Text
+
+  // Process Status
+  current_step          Int      @default(1) // 1-5
+  completed             Boolean  @default(false)
+
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+  completed_at          DateTime?
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module                Module   @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  hypotheses            ReflectiveHypothesis[]
+
+  @@index([user_id, module_id])
+  @@index([user_id, current_step])
+  @@index([completed])
+  @@map("reflective_thinking_process")
+}
+
+model ReflectiveHypothesis {
+  id                    String   @id @default(uuid())
+  process_id            String
+  user_id               String
+
+  // Hypothesis Data
+  hypothesis_text       String   @db.Text
+  source                String   @default("user") @db.VarChar(20) // 'user' | 'system' | 'combined'
+
+  // Evaluation
+  feasibility_score     Int?     // 1-10
+  impact_score          Int?     // 1-10
+  sustainability_score  Int?     // 1-10
+
+  // Reasoning
+  supporting_evidence   Json?    // Evidence that supports
+  opposing_evidence     Json?    // Evidence that challenges
+  consequences_if_true  Json?    // Array of consequences
+  consequences_if_false Json?    // Array of consequences
+
+  // Status
+  status                String   @default("generated") @db.VarChar(50) // 'generated' | 'evaluated' | 'selected' | 'tested' | 'rejected'
+  selected_for_testing  Boolean  @default(false)
+
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  process               ReflectiveThinkingProcess @relation(fields: [process_id], references: [id], onDelete: Cascade)
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([process_id])
+  @@index([user_id, status])
+  @@map("reflective_hypothesis")
+}
+
+model HabitsOfMind {
+  id                    String   @id @default(uuid())
+  user_id               String
+  module_id             String?
+
+  // Open-mindedness
+  open_mindedness_score Decimal  @default(0) @db.Decimal(5, 2) // 0-100
+  considers_alternatives Boolean @default(false)
+  questions_assumptions Boolean @default(false)
+  explores_solutions    Boolean @default(false)
+
+  // Responsibility
+  responsibility_score  Decimal  @default(0) @db.Decimal(5, 2) // 0-100
+  considers_consequences Boolean @default(false)
+  takes_ownership       Boolean @default(false)
+  applies_personally    Boolean @default(false)
+
+  // Whole-heartedness
+  whole_heartedness_score Decimal @default(0) @db.Decimal(5, 2) // 0-100
+  engagement_level      Int      @default(0) // 0-10
+  curiosity_demonstrated Boolean @default(false)
+  attention_sustained   Boolean @default(false)
+
+  // Context
+  assessment_type       String   @db.VarChar(50) // 'module' | 'section' | 'activity' | 'overall'
+  activity_id           String?
+
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module                Module?  @relation(fields: [module_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id, module_id])
+  @@index([user_id, created_at])
+  @@map("habits_of_mind")
+}
+
+model LanguageActivity {
+  id                    String   @id @default(uuid())
+  user_id               String
+  module_id             String
+  section_id            String?
+
+  // Activity Type
+  activity_type         String   @db.VarChar(50) // 'articulation' | 'hypothesis_writing' | 'reflection' | 'concept_mapping' | 'explanation'
+
+  // User Response
+  user_response         String   @db.Text
+  required_elements     Json     // Which elements were required
+  elements_completed    Json     // Which elements user completed
+
+  // Assessment
+  clarity_score         Decimal? @db.Decimal(5, 2) // 0-100
+  completeness_score    Decimal? @db.Decimal(5, 2) // 0-100
+  reasoning_quality      Decimal? @db.Decimal(5, 2) // 0-100
+  overall_score         Decimal? @db.Decimal(5, 2) // 0-100
+
+  // Feedback
+  feedback_provided     Boolean  @default(false)
+  feedback_content      String?  @db.Text
+
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  module                Module   @relation(fields: [module_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, module_id])
+  @@index([activity_type])
+  @@index([created_at])
+  @@map("language_activities")
 }

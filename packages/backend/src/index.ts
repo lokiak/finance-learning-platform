@@ -20,6 +20,11 @@ import aiRoutes from './routes/ai';
 import journalRoutes from './routes/journal';
 import moodRoutes from './routes/mood';
 import preferencesRoutes from './routes/preferences';
+import adaptiveLearningRoutes from './routes/adaptiveLearning';
+import reflectionRoutes from './routes/reflection';
+import wellnessRoutes from './routes/wellness';
+import supportRoutes from './routes/support';
+import holisticRoutes from './routes/holistic';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -55,6 +60,11 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/journal', journalRoutes);
 app.use('/api/mood', moodRoutes);
 app.use('/api/preferences', preferencesRoutes);
+app.use('/api/learning', adaptiveLearningRoutes);
+app.use('/api/reflection', reflectionRoutes);
+app.use('/api/wellness', wellnessRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/holistic', holisticRoutes);
 
 // 404 handler
 app.use((_req, res) => {

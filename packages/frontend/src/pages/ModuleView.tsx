@@ -8,6 +8,10 @@ import Button from '@/components/shared/Button';
 import ProgressBar from '@/components/shared/ProgressBar';
 import Badge from '@/components/shared/Badge';
 import { ModuleContent } from '@finance-platform/shared';
+import { AdaptiveLearningPanel } from '@/components/educational/AdaptiveLearningPanel';
+import { PredictiveWellnessPanel } from '@/components/educational/PredictiveWellnessPanel';
+import { ProactiveSupportPanel } from '@/components/educational/ProactiveSupportPanel';
+import { HolisticEducationPanel } from '@/components/educational/HolisticEducationPanel';
 
 export default function ModuleView() {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -329,6 +333,16 @@ export default function ModuleView() {
               ))}
             </div>
           </Card>
+
+          {/* Educational Enhancement Panels */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <AdaptiveLearningPanel moduleId={moduleId!} sectionId={currentSection?.id} />
+            <PredictiveWellnessPanel moduleId={moduleId!} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <ProactiveSupportPanel moduleId={moduleId!} sectionId={currentSection?.id} />
+            <HolisticEducationPanel moduleId={moduleId!} />
+          </div>
 
           {/* Content */}
           <Card>

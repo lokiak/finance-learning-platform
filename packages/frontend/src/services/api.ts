@@ -325,6 +325,222 @@ class ApiClient {
     const response = await this.client.put('/preferences', data);
     return response.data;
   }
+
+  // Adaptive Learning endpoints
+  async trackPerformance(data: {
+    module_id: string;
+    section_id?: string;
+    concept_id?: string;
+    time_spent_seconds: number;
+    assessment_score?: number;
+    error_count?: number;
+    error_patterns?: string[];
+    completion_status: 'completed' | 'abandoned' | 'in_progress';
+    notes_taken?: boolean;
+    content_reviewed?: number;
+    interactive_engaged?: boolean;
+  }) {
+    const response = await this.client.post('/learning/performance', data);
+    return response.data;
+  }
+
+  async getLearningStyle() {
+    const response = await this.client.get('/learning/style');
+    return response.data;
+  }
+
+  async getAdaptedContent(moduleId: string, sectionId: string) {
+    const response = await this.client.get('/learning/adapt-content', {
+      params: { module_id: moduleId, section_id: sectionId },
+    });
+    return response.data;
+  }
+
+  async getConceptMastery(conceptId: string) {
+    const response = await this.client.get('/learning/mastery', {
+      params: { concept_id: conceptId },
+    });
+    return response.data;
+  }
+
+  async getLearningPath(currentModule: string) {
+    const response = await this.client.get('/learning/path', {
+      params: { current_module: currentModule },
+    });
+    return response.data;
+  }
+
+  async getRemediationPath(conceptId: string) {
+    const response = await this.client.get('/learning/remediation', {
+      params: { concept_id: conceptId },
+    });
+    return response.data;
+  }
+
+  // Reflective Thinking endpoints
+  async startReflection(data: { module_id: string; section_id?: string }) {
+    const response = await this.client.post('/reflection/start', data);
+    return response.data;
+  }
+
+  async updateReflectionStep(processId: string, stepNumber: number, data: any) {
+    const response = await this.client.put(`/reflection/${processId}/step/${stepNumber}`, data);
+    return response.data;
+  }
+
+  async generateHypotheses(processId: string, userHypotheses: string[]) {
+    const response = await this.client.post(`/reflection/${processId}/hypotheses`, {
+      user_hypotheses: userHypotheses,
+    });
+    return response.data;
+  }
+
+  async evaluateHypothesis(processId: string, hypothesisId: string, data: {
+    feasibility_score: number;
+    impact_score: number;
+    sustainability_score: number;
+    supporting_evidence?: string[];
+    opposing_evidence?: string[];
+    consequences_if_true?: string[];
+    consequences_if_false?: string[];
+  }) {
+    const response = await this.client.post(
+      `/reflection/${processId}/hypotheses/${hypothesisId}/evaluate`,
+      data
+    );
+    return response.data;
+  }
+
+  async testHypothesis(processId: string, data: {
+    selected_hypothesis_id: string;
+    action_plan: string;
+    calculator_used?: string;
+    calculator_results?: any;
+    real_world_applied: boolean;
+    test_results?: any;
+    reflection_on_results: string;
+  }) {
+    const response = await this.client.post(`/reflection/${processId}/test`, data);
+    return response.data;
+  }
+
+  async getReflectionProcess(processId: string) {
+    const response = await this.client.get(`/reflection/${processId}`);
+    return response.data;
+  }
+
+  async assessHabitsOfMind(moduleId: string, data: any) {
+    const response = await this.client.post('/reflection/habits-of-mind', {
+      module_id: moduleId,
+      ...data,
+    });
+    return response.data;
+  }
+
+  async submitLanguageActivity(data: {
+    module_id: string;
+    section_id?: string;
+    activity_type: 'articulation' | 'hypothesis_writing' | 'reflection' | 'concept_mapping' | 'explanation';
+    user_response: string;
+    required_elements: {
+      use_own_words: boolean;
+      provide_examples: boolean;
+      explain_reasoning: boolean;
+      connect_to_experience: boolean;
+    };
+  }) {
+    const response = await this.client.post('/reflection/language-activity', data);
+    return response.data;
+  }
+
+  // Predictive Wellness endpoints
+  async predictStress(moduleId?: string) {
+    const response = await this.client.get('/wellness/predict-stress', {
+      params: moduleId ? { module_id: moduleId } : {},
+    });
+    return response.data;
+  }
+
+  async getOptimalTime() {
+    const response = await this.client.get('/wellness/optimal-time');
+    return response.data;
+  }
+
+  async predictEngagement() {
+    const response = await this.client.get('/wellness/predict-engagement');
+    return response.data;
+  }
+
+  async getSuccessProbability(moduleId: string) {
+    const response = await this.client.get('/wellness/success-probability', {
+      params: { module_id: moduleId },
+    });
+    return response.data;
+  }
+
+  // Proactive Support endpoints
+  async generateHint(data: {
+    module_id: string;
+    section_id?: string;
+    condition: 'first_visit' | 'time_spent' | 'error_pattern' | 'hesitation';
+    time_spent?: number;
+    error_count?: number;
+  }) {
+    const response = await this.client.post('/support/hint', data);
+    return response.data;
+  }
+
+  async triggerEncouragement(data: {
+    moment_type: 'struggling' | 'progressing' | 'stuck' | 'breakthrough' | 'milestone';
+    module_id?: string;
+    progress_percentage?: number;
+    recent_achievements?: string[];
+  }) {
+    const response = await this.client.post('/support/encouragement', data);
+    return response.data;
+  }
+
+  async getBreakSuggestion() {
+    const response = await this.client.get('/support/break-suggestion');
+    return response.data;
+  }
+
+  async celebrateProgress(data: {
+    achievement_type: 'section_complete' | 'module_complete' | 'phase_complete' | 'streak' | 'mastery';
+    module_id?: string;
+    module_title?: string;
+    significance?: 'micro' | 'minor' | 'major' | 'milestone';
+  }) {
+    const response = await this.client.post('/support/celebrate', data);
+    return response.data;
+  }
+
+  // Holistic Education endpoints
+  async getEmotionalState(moduleId?: string) {
+    const response = await this.client.get('/holistic/emotional-state', {
+      params: moduleId ? { module_id: moduleId } : {},
+    });
+    return response.data;
+  }
+
+  async getBehavioralPatterns() {
+    const response = await this.client.get('/holistic/behavioral-patterns');
+    return response.data;
+  }
+
+  async getRealWorldApplication(moduleId: string) {
+    const response = await this.client.get('/holistic/real-world-application', {
+      params: { module_id: moduleId },
+    });
+    return response.data;
+  }
+
+  async getModuleConnections(moduleId: string) {
+    const response = await this.client.get('/holistic/module-connections', {
+      params: { module_id: moduleId },
+    });
+    return response.data;
+  }
 }
 
 export const api = new ApiClient();

@@ -10,3 +10,8 @@ export * from './journal';
 export * from './mood';
 export * from './preferences';
 export * from './soundscape';
+export * from './adaptiveLearning';
+export * from './predictiveWellness';
+export * from './proactiveSupport';
+export * from './holisticEducation';
+export * from './reflectiveThinking';

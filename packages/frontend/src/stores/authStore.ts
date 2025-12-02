@@ -17,13 +17,17 @@ interface AuthState {
   clearError: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  profile: null,
-  token: localStorage.getItem('auth_token'),
-  isAuthenticated: !!localStorage.getItem('auth_token'),
-  isLoading: !!localStorage.getItem('auth_token'), // Start as loading if we have a token
-  error: null,
+export const useAuthStore = create<AuthState>((set) => {
+  const token = localStorage.getItem('auth_token');
+  return {
+    user: null,
+    profile: null,
+    token,
+    // Assume authenticated if token exists - will be verified by loadUser()
+    // This prevents logout on refresh before loadUser() completes
+    isAuthenticated: !!token,
+    isLoading: !!token, // Start as loading if we have a token to verify
+    error: null,
 
   login: async (email, password) => {
     set({ isLoading: true, error: null });
@@ -88,7 +92,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   loadUser: async () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      set({ isAuthenticated: false });
+      set({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        profile: null,
+        token: null,
+      });
       return;
     }
 
@@ -103,17 +113,31 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-    } catch (error) {
-      localStorage.removeItem('auth_token');
-      set({
-        user: null,
-        profile: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
+    } catch (error: any) {
+      // Only clear token if it's actually invalid (401/403), not for network errors
+      const isAuthError = error.response?.status === 401 || error.response?.status === 403;
+      if (isAuthError) {
+        localStorage.removeItem('auth_token');
+        set({
+          user: null,
+          profile: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      } else {
+        // For network errors, keep the token and assume still authenticated
+        // This prevents logout on temporary network issues
+        console.error('Failed to load user:', error);
+        set({
+          isLoading: false,
+          isAuthenticated: true, // Keep authenticated state if token exists
+          error: 'Failed to load user. Please refresh the page.',
+        });
+      }
     }
   },
 
   clearError: () => set({ error: null }),
-}));
+  };
+});

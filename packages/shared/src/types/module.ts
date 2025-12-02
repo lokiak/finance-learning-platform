@@ -51,3 +51,5 @@ export interface ModuleWithProgress extends Module {
 }
 
 export type ProgressStatus = 'not_started' | 'in_progress' | 'completed';
+
+export type ReflectionRequired = 'full' | 'hybrid' | 'none';
