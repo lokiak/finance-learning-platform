@@ -88,6 +88,8 @@ enum ReflectionRequired {
 enum UserRole {
   user
   admin
+
+  @@map("userrole")
 }
 
 // User Models

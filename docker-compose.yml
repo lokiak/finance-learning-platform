@@ -34,6 +34,8 @@ services:
     volumes:
       - ./packages/backend/src:/app/packages/backend/src
       - ./packages/backend/prisma:/app/packages/backend/prisma
+      - ./packages/backend/jest.config.js:/app/packages/backend/jest.config.js
+      - ./packages/backend/tsconfig.json:/app/packages/backend/tsconfig.json
       - ./packages/shared/src:/app/packages/shared/src
       - ./packages/shared/dist:/app/packages/shared/dist
     depends_on:

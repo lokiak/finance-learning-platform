@@ -76,8 +76,13 @@ app.use((_req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-// Start server
+// Start server (skip in test environment)
 async function startServer() {
+  // Don't start server in test environment
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+
   try {
     // Test database connection
     await prisma.$connect();
@@ -93,17 +98,19 @@ async function startServer() {
   }
 }
 
-// Handle shutdown gracefully
-process.on('SIGINT', async () => {
-  console.log('Shutting down gracefully...');
-  await prisma.$disconnect();
-  process.exit(0);
-});
+// Handle shutdown gracefully (skip in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  process.on('SIGINT', async () => {
+    console.log('Shutting down gracefully...');
+    await prisma.$disconnect();
+    process.exit(0);
+  });
 
-process.on('SIGTERM', async () => {
-  console.log('Shutting down gracefully...');
-  await prisma.$disconnect();
-  process.exit(0);
-});
+  process.on('SIGTERM', async () => {
+    console.log('Shutting down gracefully...');
+    await prisma.$disconnect();
+    process.exit(0);
+  });
 
-startServer();
+  startServer();
+}
