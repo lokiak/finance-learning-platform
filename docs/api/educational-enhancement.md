@@ -16,25 +16,26 @@ Track learning performance metrics.
 {
   "module_id": "uuid",
   "section_id": "uuid",
-  "time_spent_minutes": 15,
-  "engagement_score": 8,
-  "comprehension_score": 7,
-  "difficulty_rating": 3
+  "concept_id": "uuid",
+  "time_spent_seconds": 900,
+  "assessment_score": 75,
+  "error_count": 2,
+  "error_patterns": ["calculation_error"],
+  "completion_status": "completed",
+  "notes_taken": true,
+  "content_reviewed": 3,
+  "interactive_engaged": true
 }
 ```
 
-**Response (201):**
+**Response (200):**
 ```json
 {
-  "performance": {
-    "id": "uuid",
-    "user_id": "uuid",
-    "module_id": "uuid",
-    "time_spent_minutes": 15,
-    "engagement_score": 8,
-    "comprehension_score": 7,
-    "difficulty_rating": 3,
-    "created_at": "2024-01-01T00:00:00.000Z"
+  "performance_id": "uuid",
+  "adaptations": {
+    "content_difficulty": "standard",
+    "next_section_recommendation": "proceed",
+    "remediation_needed": false
   }
 }
 ```
@@ -56,17 +57,19 @@ Get detected learning style for the current user.
 }
 ```
 
-### GET /api/learning/adapt-content?module_id=:moduleId
+### GET /api/learning/adapt-content
 Get adapted content recommendations for a module.
 
 **Query Parameters:**
 - `module_id` (required) - Module UUID
+- `section_id` (required) - Section UUID
 
 **Response (200):**
 ```json
 {
   "adapted_content": {
     "module_id": "uuid",
+    "section_id": "uuid",
     "recommended_path": "standard",
     "difficulty_adjustment": "none",
     "additional_resources": [],
@@ -75,86 +78,89 @@ Get adapted content recommendations for a module.
 }
 ```
 
-### GET /api/learning/mastery?module_id=:moduleId
-Get concept mastery level for a module.
+**Error Responses:**
+- `400` - Missing module_id or section_id
+
+### GET /api/learning/mastery
+Get concept mastery level for a specific concept.
 
 **Query Parameters:**
-- `module_id` (required) - Module UUID
+- `concept_id` (required) - Concept UUID
 
 **Response (200):**
 ```json
 {
-  "mastery": {
-    "module_id": "uuid",
-    "overall_mastery": 0.75,
-    "concepts": [
-      {
-        "concept": "compound_interest",
-        "mastery_level": 0.85,
-        "last_assessed": "2024-01-01T00:00:00.000Z"
-      }
-    ]
-  }
+  "concept_id": "uuid",
+  "mastery_level": 0.75,
+  "status": "mastered",
+  "assessment_history": [],
+  "next_review_date": "2024-01-15T00:00:00.000Z",
+  "spaced_interval_days": 7
 }
 ```
 
-### GET /api/learning/path?module_id=:moduleId
-Get recommended learning path for a module.
+**Error Responses:**
+- `400` - Missing concept_id
+
+### GET /api/learning/path
+Get recommended learning path.
 
 **Query Parameters:**
-- `module_id` (required) - Module UUID
+- `current_module` (required) - Current module UUID
 
 **Response (200):**
 ```json
 {
-  "path": {
-    "module_id": "uuid",
-    "recommended_path": "standard",
-    "reasoning": "User shows good comprehension",
-    "estimated_completion_time": 25
-  }
+  "recommended_modules": [],
+  "reasoning": "User shows good comprehension",
+  "estimated_completion_time": 25
 }
 ```
 
-### GET /api/learning/remediation?module_id=:moduleId
-Get remediation path if user is struggling.
+**Error Responses:**
+- `400` - Missing current_module
+
+### GET /api/learning/remediation
+Get remediation path if user is struggling with a concept.
 
 **Query Parameters:**
-- `module_id` (required) - Module UUID
+- `concept_id` (required) - Concept UUID
 
 **Response (200):**
 ```json
 {
-  "remediation": {
-    "module_id": "uuid",
-    "needed": true,
-    "focus_areas": ["compound_interest", "time_value"],
-    "recommended_resources": [],
-    "estimated_additional_time": 15
-  }
+  "concept_id": "uuid",
+  "remediation_needed": true,
+  "focus_areas": ["compound_interest", "time_value"],
+  "recommended_resources": [],
+  "estimated_additional_time": 15
 }
 ```
+
+**Error Responses:**
+- `400` - Missing concept_id or remediation not needed
 
 ## Predictive Wellness
 
 ### GET /api/wellness/predict-stress
 Predict user stress level based on learning patterns.
 
+**Query Parameters:**
+- `module_id` (optional) - Module UUID for module-specific prediction
+
 **Response (200):**
 ```json
 {
-  "prediction": {
-    "stress_level": "moderate",
-    "confidence": 0.72,
-    "factors": [
-      "recent_failed_attempts",
-      "time_pressure"
-    ],
-    "recommendations": [
-      "Take a short break",
-      "Review previous concepts"
-    ]
-  }
+  "predicted_stress_level": 6,
+  "confidence": 0.72,
+  "factors": [
+    "recent_failed_attempts",
+    "time_pressure"
+  ],
+  "recommendations": [
+    "Take a short break",
+    "Review previous concepts"
+  ]
 }
 ```
 
@@ -172,25 +178,20 @@ Detect optimal learning time for the user.
 }
 ```
 
-### GET /api/wellness/predict-engagement?module_id=:moduleId
-Predict engagement level for a module.
-
-**Query Parameters:**
-- `module_id` (required) - Module UUID
+### GET /api/wellness/predict-engagement
+Predict engagement level for upcoming learning.
 
 **Response (200):**
 ```json
 {
-  "engagement_prediction": {
-    "module_id": "uuid",
-    "predicted_engagement": 7.5,
-    "confidence": 0.75,
-    "factors": ["user_interest", "prerequisite_mastery"]
-  }
+  "predicted_engagement": 7.5,
+  "confidence": 0.75,
+  "factors": ["user_interest", "prerequisite_mastery"],
+  "suggest_alternative": null
 }
 ```
 
-### GET /api/wellness/success-probability?module_id=:moduleId
+### GET /api/wellness/success-probability
 Calculate probability of module completion success.
 
 **Query Parameters:**
@@ -199,17 +200,18 @@ Calculate probability of module completion success.
 **Response (200):**
 ```json
 {
-  "success_probability": {
-    "module_id": "uuid",
-    "probability": 0.82,
-    "confidence": 0.70,
-    "key_factors": [
-      "strong_prerequisite_mastery",
-      "good_time_availability"
-    ]
-  }
+  "module_id": "uuid",
+  "probability": 0.82,
+  "confidence": 0.70,
+  "key_factors": [
+    "strong_prerequisite_mastery",
+    "good_time_availability"
+  ]
 }
 ```
+
+**Error Responses:**
+- `400` - Missing module_id
 
 ## Proactive Support
 
@@ -221,9 +223,20 @@ Request a contextual hint.
 {
   "module_id": "uuid",
   "section_id": "uuid",
-  "context": "struggling_with_concept"
+  "condition": "first_visit",
+  "time_spent": 300,
+  "error_count": 3
 }
 ```
+
+**Required Fields:**
+- `module_id` - Module UUID
+- `condition` - One of: `first_visit`, `time_spent`, `error_pattern`, `hesitation`
+
+**Optional Fields:**
+- `section_id` - Section UUID
+- `time_spent` - Time spent in seconds
+- `error_count` - Number of errors encountered
 
 **Response (200):**
 ```json
@@ -236,15 +249,29 @@ Request a contextual hint.
 }
 ```
 
+**Error Responses:**
+- `400` - Missing module_id or condition
+
 ### POST /api/support/encouragement
 Trigger encouragement message.
 
 **Request Body:**
 ```json
 {
-  "context": "module_completed"
+  "moment_type": "milestone",
+  "module_id": "uuid",
+  "progress_percentage": 75,
+  "recent_achievements": ["module_completion"]
 }
 ```
+
+**Required Fields:**
+- `moment_type` - One of: `struggling`, `progressing`, `stuck`, `breakthrough`, `milestone`
+
+**Optional Fields:**
+- `module_id` - Module UUID
+- `progress_percentage` - Progress percentage (0-100)
+- `recent_achievements` - Array of achievement strings
 
 **Response (200):**
 ```json
@@ -256,6 +283,9 @@ Trigger encouragement message.
   }
 }
 ```
+
+**Error Responses:**
+- `400` - Missing moment_type
 
 ### GET /api/support/break-suggestion
 Get break suggestion if user has been learning for extended period.
@@ -278,12 +308,20 @@ Celebrate user progress milestone.
 **Request Body:**
 ```json
 {
-  "milestone_type": "phase_completion",
-  "milestone_data": {
-    "phase": 1
-  }
+  "achievement_type": "phase_completion",
+  "module_id": "uuid",
+  "module_title": "Module 1: Your Money Story",
+  "significance": "high"
 }
 ```
+
+**Required Fields:**
+- `achievement_type` - Achievement type string
+
+**Optional Fields:**
+- `module_id` - Module UUID
+- `module_title` - Module title
+- `significance` - Significance level
 
 **Response (200):**
 ```json
@@ -295,6 +333,9 @@ Celebrate user progress milestone.
   }
 }
 ```
+
+**Error Responses:**
+- `400` - Missing achievement_type
 
 ## Holistic Education
 
@@ -372,24 +413,7 @@ Find connections between modules.
 }
 ```
 
-### GET /api/holistic/modules/:moduleId/readiness
-Check if user is ready for a module.
-
-**Path Parameters:**
-- `moduleId` (required) - Module UUID
-
-**Response (200):**
-```json
-{
-  "readiness": {
-    "module_id": "uuid",
-    "can_proceed": true,
-    "readiness_score": 0.85,
-    "prerequisites_met": true,
-    "recommendations": []
-  }
-}
-```
+**Note:** Module readiness endpoint is not currently implemented as a separate route. Readiness is checked through the holistic education service methods.
 
 ## Reflective Thinking
 
@@ -400,58 +424,66 @@ Start a new reflective thinking process.
 ```json
 {
   "module_id": "uuid",
-  "section_id": "uuid",
-  "problematic_situation": {
-    "description": "I'm confused about compound interest calculations",
-    "user_reaction": "confused",
-    "engagement_level": 6
-  }
+  "section_id": "uuid"
 }
 ```
 
-**Response (201):**
+**Required Fields:**
+- `module_id` - Module UUID
+
+**Optional Fields:**
+- `section_id` - Section UUID
+
+**Response (200):**
 ```json
 {
-  "process": {
-    "id": "uuid",
-    "user_id": "uuid",
-    "module_id": "uuid",
-    "current_step": 1,
-    "status": "in_progress",
-    "created_at": "2024-01-01T00:00:00.000Z"
-  }
+  "process_id": "uuid",
+  "step_1": {
+    "problematic_situation": {
+      "description": "I'm confused about compound interest calculations",
+      "user_reaction": "confused",
+      "engagement_level": 6
+    }
+  },
+  "current_step": 1,
+  "guidance": "Step 1 guidance text..."
 }
 ```
 
+**Error Responses:**
+- `400` - Missing module_id
+
 ### PUT /api/reflection/:processId/step/:stepNumber
-Update a step in the reflection process.
+Update step 2 (Problem Definition) in the reflection process.
 
 **Path Parameters:**
 - `processId` (required) - Process UUID
-- `stepNumber` (required) - Step number (1-5)
+- `stepNumber` (required) - Must be `2`
 
 **Request Body:**
 ```json
 {
-  "step_data": {
-    "problem_definition": "I need to understand how interest compounds over multiple periods"
-  }
+  "user_articulation": "I need to understand how interest compounds over multiple periods",
+  "clarification_answers": {}
 }
 ```
 
 **Response (200):**
 ```json
 {
-  "process": {
-    "id": "uuid",
-    "current_step": 2,
-    "status": "in_progress"
-  }
+  "process_id": "uuid",
+  "step_completed": 2,
+  "refined_problem": "Refined problem statement",
+  "next_step": 3,
+  "guidance": "Step 3 guidance text..."
 }
 ```
 
+**Error Responses:**
+- `400` - Invalid step number (only step 2 is supported via this endpoint)
+
 ### POST /api/reflection/:processId/hypotheses
-Add hypotheses to the reflection process.
+Generate and add hypotheses to the reflection process.
 
 **Path Parameters:**
 - `processId` (required) - Process UUID
@@ -459,14 +491,15 @@ Add hypotheses to the reflection process.
 **Request Body:**
 ```json
 {
-  "hypotheses": [
-    {
-      "statement": "Compound interest grows exponentially",
-      "reasoning": "Each period's interest is added to principal"
-    }
+  "user_hypotheses": [
+    "Compound interest grows exponentially",
+    "Each period's interest is added to principal"
   ]
 }
 ```
+
+**Required Fields:**
+- `user_hypotheses` - Array of hypothesis strings (non-empty)
 
 **Response (200):**
 ```json
@@ -477,9 +510,18 @@ Add hypotheses to the reflection process.
       "statement": "Compound interest grows exponentially",
       "status": "pending"
     }
-  ]
+  ],
+  "alternative_perspectives": [],
+  "comparison_framework": {
+    "criteria": ["feasibility", "impact", "sustainability"],
+    "next_step": "Evaluate each hypothesis"
+  },
+  "guidance": "Step 4 guidance text..."
 }
 ```
+
+**Error Responses:**
+- `400` - Missing or empty user_hypotheses array
 
 ### POST /api/reflection/:processId/hypotheses/:hypothesisId/evaluate
 Evaluate a hypothesis.
@@ -491,27 +533,46 @@ Evaluate a hypothesis.
 **Request Body:**
 ```json
 {
-  "evaluation": {
-    "valid": true,
-    "evidence": ["formula_confirmation", "example_verification"],
-    "reasoning": "The formula confirms exponential growth"
-  }
+  "feasibility_score": 8,
+  "impact_score": 9,
+  "sustainability_score": 7,
+  "supporting_evidence": ["formula_confirmation", "example_verification"],
+  "opposing_evidence": [],
+  "consequences_if_true": ["Better understanding", "Improved calculations"],
+  "consequences_if_false": []
 }
 ```
+
+**Required Fields:**
+- `feasibility_score` - Score 1-10
+- `impact_score` - Score 1-10
+- `sustainability_score` - Score 1-10
+- `reflection_on_results` - Reflection text
+
+**Optional Fields:**
+- `supporting_evidence` - Array of evidence strings
+- `opposing_evidence` - Array of evidence strings
+- `consequences_if_true` - Array of consequence strings
+- `consequences_if_false` - Array of consequence strings
 
 **Response (200):**
 ```json
 {
-  "hypothesis": {
-    "id": "uuid",
-    "status": "validated",
-    "evaluation": { ... }
-  }
+  "hypothesis_id": "uuid",
+  "evaluation": {
+    "feasibility": 8,
+    "impact": 9,
+    "sustainability": 7,
+    "overall_score": 8.0
+  },
+  "recommendation": "Strong hypothesis. Consider testing this approach.",
+  "next_steps": "Test this hypothesis or explore alternatives",
+  "guidance": "Step 5 guidance text..."
 }
 ```
 
 ### POST /api/reflection/:processId/test
-Test the selected hypothesis.
+Test the selected hypothesis and complete the reflection process.
 
 **Path Parameters:**
 - `processId` (required) - Process UUID
@@ -519,25 +580,47 @@ Test the selected hypothesis.
 **Request Body:**
 ```json
 {
-  "test_data": {
-    "scenario": "Calculate 10% interest on $1000 for 3 years",
-    "result": "Expected: $1331, Actual: $1331",
-    "conclusion": "Hypothesis confirmed"
-  }
+  "selected_hypothesis_id": "uuid",
+  "action_plan": "Apply compound interest formula to calculate future value",
+  "calculator_used": "compound_growth",
+  "calculator_results": {},
+  "real_world_applied": true,
+  "test_results": {
+    "insights": ["Formula works correctly", "Understanding improved"]
+  },
+  "reflection_on_results": "The hypothesis was confirmed through testing"
 }
 ```
+
+**Required Fields:**
+- `selected_hypothesis_id` - Hypothesis UUID to test
+- `action_plan` - Plan for testing
+- `reflection_on_results` - Reflection on test results
+
+**Optional Fields:**
+- `calculator_used` - Calculator type used
+- `calculator_results` - Calculator output
+- `real_world_applied` - Boolean (default: false)
+- `test_results` - Test results object
 
 **Response (200):**
 ```json
 {
-  "process": {
-    "id": "uuid",
-    "current_step": 5,
-    "status": "completed",
-    "conclusion": "Hypothesis confirmed through testing"
-  }
+  "process_id": "uuid",
+  "step_completed": 5,
+  "process_complete": true,
+  "final_reflection": {
+    "problem_solved": true,
+    "solution": "Apply compound interest formula to calculate future value",
+    "lessons_learned": ["Formula works correctly", "Understanding improved"],
+    "next_actions": ["Implement the solution", "Track results", "Adjust as needed"]
+  },
+  "mastery_achieved": true
 }
 ```
+
+**Error Responses:**
+- `400` - Missing required fields
 
 ### GET /api/reflection/:processId
 Get reflection process status.
@@ -548,65 +631,159 @@ Get reflection process status.
 **Response (200):**
 ```json
 {
-  "process": {
-    "id": "uuid",
-    "current_step": 3,
-    "status": "in_progress",
-    "problematic_situation": { ... },
-    "hypotheses": [ ... ],
-    "created_at": "2024-01-01T00:00:00.000Z"
-  }
+  "process_id": "uuid",
+  "module_id": "uuid",
+  "current_step": 3,
+  "completed": false,
+  "steps": {
+    "step_1": {
+      "completed": true,
+      "problematic_situation": {},
+      "user_reaction": "confused"
+    },
+    "step_2": {
+      "completed": true,
+      "refined_problem": "Problem statement"
+    },
+    "step_3": {
+      "completed": false,
+      "in_progress": true,
+      "hypotheses_generated": 3,
+      "hypotheses_evaluated": 0
+    },
+    "step_4": {
+      "completed": false,
+      "in_progress": false
+    },
+    "step_5": {
+      "completed": false,
+      "in_progress": false
+    }
+  },
+  "guidance": "Current step guidance text..."
+}
+```
+
+### GET /api/reflection/habits-of-mind
+Get habits of mind assessment (placeholder).
+
+**Query Parameters:**
+- `module_id` (optional) - Module UUID
+
+**Response (200):**
+```json
+{
+  "message": "Habits of mind assessment endpoint. Use POST to create assessment.",
+  "module_id": "uuid"
 }
 ```
 
 ### POST /api/reflection/habits-of-mind
-Track habits of mind development.
+Assess habits of mind development.
 
 **Request Body:**
 ```json
 {
   "module_id": "uuid",
-  "habit_type": "persistence",
-  "demonstrated": true,
-  "context": "worked_through_difficult_problem"
+  "considers_alternatives": true,
+  "questions_assumptions": true,
+  "explores_solutions": true,
+  "considers_consequences": true,
+  "takes_ownership": true,
+  "applies_personally": true,
+  "engagement_level": 8,
+  "curiosity_demonstrated": true,
+  "attention_sustained": true
 }
 ```
 
-**Response (201):**
+**Required Fields:**
+- `module_id` - Module UUID
+
+**Response (200):**
 ```json
 {
-  "habit": {
-    "id": "uuid",
-    "habit_type": "persistence",
-    "demonstrated": true,
-    "recorded_at": "2024-01-01T00:00:00.000Z"
-  }
+  "open_mindedness": {
+    "score": 8.5,
+    "indicators": {
+      "considers_alternatives": true,
+      "questions_assumptions": true,
+      "explores_solutions": true
+    }
+  },
+  "responsibility": {
+    "score": 7.5,
+    "indicators": {
+      "considers_consequences": true,
+      "takes_ownership": true,
+      "applies_personally": true
+    }
+  },
+  "whole_heartedness": {
+    "score": 8.0,
+    "indicators": {
+      "engagement_level": 8,
+      "curiosity_demonstrated": true,
+      "attention_sustained": true
+    }
+  },
+  "overall_score": 8.0
 }
 ```
+
+**Error Responses:**
+- `400` - Missing module_id
 
 ### POST /api/reflection/language-activity
-Record language-based learning activity.
+Submit and evaluate a language-based learning activity.
 
 **Request Body:**
 ```json
 {
   "module_id": "uuid",
+  "section_id": "uuid",
   "activity_type": "explanation",
-  "content": "I explained compound interest to a friend",
-  "reflection": "Helped clarify my own understanding"
-}
-```
-
-**Response (201):**
-```json
-{
-  "activity": {
-    "id": "uuid",
-    "activity_type": "explanation",
-    "recorded_at": "2024-01-01T00:00:00.000Z"
+  "user_response": "Compound interest is when you earn interest on both your principal and previously earned interest",
+  "required_elements": {
+    "use_own_words": true,
+    "provide_examples": true,
+    "explain_reasoning": true,
+    "connect_to_experience": false
   }
 }
 ```
+
+**Required Fields:**
+- `module_id` - Module UUID
+- `activity_type` - One of: `articulation`, `hypothesis_writing`, `reflection`, `concept_mapping`, `explanation`
+- `user_response` - User's written response
+- `required_elements` - Object with boolean flags for required elements
+
+**Optional Fields:**
+- `section_id` - Section UUID
+
+**Response (200):**
+```json
+{
+  "activity_id": "uuid",
+  "assessment": {
+    "clarity_score": 8.5,
+    "completeness_score": 7.0,
+    "reasoning_quality": 8.0,
+    "overall_score": 7.83
+  },
+  "feedback": "Good explanation. Consider adding examples.",
+  "elements_completed": {
+    "use_own_words": true,
+    "provide_examples": true,
+    "explain_reasoning": true,
+    "connect_to_experience": false
+  }
+}
+```
+
+**Error Responses:**
+- `400` - Missing required fields
 
 ## Error Codes
 

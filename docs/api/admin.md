@@ -29,76 +29,106 @@ Get complete analytics dashboard data.
       "totalUsers": 150,
       "activeUsers": 45,
       "totalModules": 17,
-      "modulesInProgress": 89,
-      "modulesCompleted": 234,
-      "averageCompletionRate": 0.68
+      "completedModules": 234,
+      "averageCompletionRate": 68.5
     },
     "predictions": {
-      "totalPredictions": 1200,
-      "accuracyRate": 0.75,
-      "stressPredictions": {
-        "total": 450,
-        "accurate": 320,
-        "accuracy": 0.71
+      "stressPredictionAccuracy": {
+        "totalPredictions": 1200,
+        "predictionsWithOutcomes": 450,
+        "averageAccuracy": 71.5,
+        "accuracyByLevel": [
+          { "level": 3, "accuracy": 75.2, "count": 120 },
+          { "level": 5, "accuracy": 68.9, "count": 200 }
+        ]
       },
       "engagementPredictions": {
-        "total": 750,
-        "accurate": 580,
-        "accuracy": 0.77
+        "totalPredictions": 0,
+        "averageConfidence": 0
       }
     },
     "adaptations": {
-      "totalAdaptations": 890,
-      "adaptationTypes": {
+      "learningStyleDetection": {
+        "totalDetections": 150,
+        "detectionConfidence": {
+          "average": 78.5,
+          "distribution": [
+            { "range": "0-0.5", "count": 5 },
+            { "range": "0.5-0.7", "count": 30 },
+            { "range": "0.7-0.9", "count": 80 },
+            { "range": "0.9-1.0", "count": 35 }
+          ]
+        }
+      },
+      "masteryImprovements": {
+        "totalConcepts": 450,
+        "averageMasteryGain": 72.3,
+        "masteryDistribution": [
+          { "range": "0-25", "count": 50 },
+          { "range": "25-50", "count": 120 },
+          { "range": "50-75", "count": 180 },
+          { "range": "75-100", "count": 100 }
+        ]
+      },
+      "adaptivePathUsage": {
         "fast": 120,
         "standard": 450,
         "thorough": 280,
         "remedial": 40
-      },
-      "effectiveness": {
-        "improved_completion": 0.65,
-        "improved_engagement": 0.72
       }
     },
     "support": {
-      "totalInterventions": 560,
-      "interventionTypes": {
-        "hint": 320,
-        "encouragement": 150,
-        "break_suggestion": 60,
-        "celebration": 30
+      "hints": {
+        "totalGenerated": 320,
+        "displayed": 280,
+        "acknowledged": 200,
+        "helpful": 156,
+        "notHelpful": 44,
+        "effectivenessRate": 78.0
       },
-      "utilizationRate": 0.42,
-      "effectiveness": {
-        "hint_helpfulness": 0.78,
-        "encouragement_impact": 0.85
+      "encouragements": {
+        "totalGenerated": 150,
+        "displayed": 140,
+        "acknowledged": 120
+      },
+      "breaks": {
+        "totalSuggested": 60,
+        "taken": 39,
+        "takenRate": 65.0
+      },
+      "celebrations": {
+        "totalGenerated": 30,
+        "displayed": 30
       }
     },
     "engagement": {
-      "averageEngagementScore": 7.2,
-      "engagementTrend": "increasing",
-      "peakLearningTimes": ["morning", "evening"],
-      "averageSessionDuration": 28
+      "averageSessionLength": 28.5,
+      "averageTimePerModule": 25.3,
+      "dropOffPoints": [
+        { "moduleId": "uuid", "moduleTitle": "Module 1", "dropOffRate": 15.2 }
+      ],
+      "completionRates": [
+        { "moduleId": "uuid", "moduleTitle": "Module 1", "completionRate": 85.5 }
+      ]
     },
     "reflection": {
       "totalProcesses": 340,
       "completedProcesses": 280,
-      "completionRate": 0.82,
+      "completionRate": 82.35,
       "averageStepsCompleted": 4.2,
-      "habitsOfMindTracked": 890
+      "processesByStep": [
+        { "step": 1, "count": 340 },
+        { "step": 2, "count": 320 },
+        { "step": 3, "count": 300 },
+        { "step": 4, "count": 290 },
+        { "step": 5, "count": 280 }
+      ]
     },
     "performance": {
-      "averageMasteryLevel": 0.72,
-      "conceptMasteryDistribution": {
-        "high": 0.35,
-        "medium": 0.45,
-        "low": 0.20
-      },
-      "learningStyleDistribution": {
-        "visual": 0.40,
-        "auditory": 0.25,
-        "kinesthetic": 0.35
-      }
+      "averageAssessmentScore": 75.5,
+      "averageTimeSpent": 25.3,
+      "errorRate": 12.5,
+      "engagementScore": 7.2
     }
   }
 }

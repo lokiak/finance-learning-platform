@@ -18,16 +18,25 @@ Authorization: Bearer <jwt_token>
 ## API Endpoints
 
 ### Core Endpoints
-- [Authentication](./authentication.md) - User registration, login, logout
-- [Users & Profile](./users.md) - User management and profiles
+- [Authentication](./authentication.md) - User registration, login, logout, current user
+- [Users & Profile](./users.md) - User profile management and dashboard data
 - [Modules & Progress](./modules.md) - Learning modules and progress tracking
 - [Calculators & Goals](./calculators-goals.md) - Financial calculators and goal management
 
 ### Educational Enhancement Endpoints
-- [Educational Enhancement](./educational-enhancement.md) - Adaptive learning, wellness, support, holistic education, and reflection
+- [Educational Enhancement](./educational-enhancement.md) - Adaptive learning, predictive wellness, proactive support, holistic education, and reflective thinking
 
 ### Administrative Endpoints
 - [Admin](./admin.md) - Admin console and analytics (admin only)
+
+**Note:** Additional endpoints exist for:
+- Achievements (`/api/achievements`)
+- AI Chat (`/api/ai`)
+- Journal (`/api/journal`)
+- Mood Tracking (`/api/mood`)
+- User Preferences (`/api/preferences`)
+
+These endpoints are documented in the legacy API documentation (`../03-backend-api.md`) and will be migrated to this structure.
 
 ## Response Format
 
