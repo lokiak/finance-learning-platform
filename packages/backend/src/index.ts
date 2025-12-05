@@ -25,6 +25,7 @@ import reflectionRoutes from './routes/reflection';
 import wellnessRoutes from './routes/wellness';
 import supportRoutes from './routes/support';
 import holisticRoutes from './routes/holistic';
+import adminRoutes from './routes/admin';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -65,6 +66,7 @@ app.use('/api/reflection', reflectionRoutes);
 app.use('/api/wellness', wellnessRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/holistic', holisticRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use((_req, res) => {

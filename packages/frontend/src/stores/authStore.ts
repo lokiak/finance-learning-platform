@@ -106,6 +106,10 @@ export const useAuthStore = create<AuthState>((set) => {
     try {
       const userData = await api.getCurrentUser();
       const profileData = await api.getProfile();
+      // Debug: Log API response
+      console.log('API userData:', userData);
+      console.log('API user object:', userData.user);
+      console.log('API user role:', userData.user?.role);
       set({
         user: userData.user,
         profile: profileData.profile,

@@ -20,10 +20,14 @@ import Journal from '@/pages/Journal';
 import JournalNew from '@/pages/JournalNew';
 import JournalPrompts from '@/pages/JournalPrompts';
 import Mood from '@/pages/Mood';
+import AdminDashboard from '@/pages/AdminDashboard';
 
 // Components
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import AdminRoute from '@/components/auth/AdminRoute';
 import NotificationContainer from '@/components/shared/NotificationContainer';
+import ToastContainer from '@/components/shared/Toast';
+import { useToastStore } from '@/stores/toastStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +40,7 @@ const queryClient = new QueryClient({
 
 function App() {
   const { loadUser, isAuthenticated } = useAuthStore();
+  const { toasts, removeToast } = useToastStore();
 
   useEffect(() => {
     loadUser();
@@ -46,6 +51,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <NotificationContainer />
+        <ToastContainer toasts={toasts} onClose={removeToast} />
         <Routes>
           {/* Auth routes */}
           <Route element={<AuthLayout />}>
@@ -71,6 +77,11 @@ function App() {
             <Route path="/journal" element={<Journal />} />
             <Route path="/journal/new" element={<JournalNew />} />
             <Route path="/journal/prompts" element={<JournalPrompts />} />
+          </Route>
+
+          {/* Admin routes */}
+          <Route element={<AdminRoute><MainLayout /></AdminRoute>}>
+            <Route path="/admin" element={<AdminDashboard />} />
           </Route>
 
           {/* Default redirect */}

@@ -43,7 +43,9 @@ export class AuthService {
     });
 
     // Generate JWT
-    const token = this.generateToken(user.id, user.email);
+    // Note: Using type assertion due to TypeScript language server cache - role field exists in DB
+    const userRole = (user as any).role || 'user';
+    const token = this.generateToken(user.id, user.email, userRole);
 
     return {
       token,
@@ -51,6 +53,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: userRole,
         created_at: user.created_at,
         updated_at: user.updated_at,
         last_login: user.last_login,
@@ -91,7 +94,9 @@ export class AuthService {
     });
 
     // Generate JWT
-    const token = this.generateToken(user.id, user.email);
+    // Note: Using type assertion due to TypeScript language server cache - role field exists in DB
+    const userRole = (user as any).role || 'user';
+    const token = this.generateToken(user.id, user.email, userRole);
 
     return {
       token,
@@ -99,6 +104,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        role: userRole,
         created_at: user.created_at,
         updated_at: user.updated_at,
         last_login: new Date(),
@@ -121,23 +127,33 @@ export class AuthService {
       );
     }
 
-    // Remove password hash
+    // Remove password hash, ensure role is included
     const { password_hash, ...userWithoutPassword } = user;
+    // Note: role field exists in DB - explicitly extract it
+    const userRole = (user as any).role;
+    console.log('getUserById - Raw user role from DB:', userRole);
 
-    return userWithoutPassword;
+    const userWithRole = {
+      ...userWithoutPassword,
+      role: userRole || 'user',
+    };
+
+    console.log('getUserById - Returning user with role:', userWithRole.role);
+
+    return userWithRole;
   }
 
-  static generateToken(userId: string, email: string): string {
+  static generateToken(userId: string, email: string, role: string = 'user'): string {
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not defined');
     }
 
-    return jwt.sign({ userId, email }, process.env.JWT_SECRET, {
+    return jwt.sign({ userId, email, role }, process.env.JWT_SECRET, {
       expiresIn: JWT_EXPIRATION,
     });
   }
 
-  static verifyToken(token: string): { userId: string; email: string } {
+  static verifyToken(token: string): { userId: string; email: string; role?: string } {
     if (!process.env.JWT_SECRET) {
       throw new Error('JWT_SECRET is not defined');
     }
@@ -146,6 +162,7 @@ export class AuthService {
       const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
         userId: string;
         email: string;
+        role?: string;
       };
       return decoded;
     } catch (error) {

@@ -541,6 +541,47 @@ class ApiClient {
     });
     return response.data;
   }
+
+  // Admin endpoints
+  async getAdminAnalytics() {
+    const response = await this.client.get('/admin/analytics');
+    return response.data;
+  }
+
+  async getAdminOverview() {
+    const response = await this.client.get('/admin/analytics/overview');
+    return response.data;
+  }
+
+  async getAdminPredictions() {
+    const response = await this.client.get('/admin/analytics/predictions');
+    return response.data;
+  }
+
+  async getAdminAdaptations() {
+    const response = await this.client.get('/admin/analytics/adaptations');
+    return response.data;
+  }
+
+  async getAdminSupport() {
+    const response = await this.client.get('/admin/analytics/support');
+    return response.data;
+  }
+
+  async getAdminEngagement() {
+    const response = await this.client.get('/admin/analytics/engagement');
+    return response.data;
+  }
+
+  async getAdminReflection() {
+    const response = await this.client.get('/admin/analytics/reflection');
+    return response.data;
+  }
+
+  async getAdminPerformance() {
+    const response = await this.client.get('/admin/analytics/performance');
+    return response.data;
+  }
 }
 
 export const api = new ApiClient();

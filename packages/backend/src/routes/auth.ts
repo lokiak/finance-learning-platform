@@ -33,6 +33,20 @@ router.get(
   authenticate,
   asyncHandler(async (req: AuthRequest, res: Response) => {
     const user = await AuthService.getUserById(req.user!.userId);
+    // ETag includes role so cache invalidates when role changes (even via SQL)
+    // Format: timestamp-role ensures freshness when role/profile changes
+    const userRole = (user as any).role || 'user';
+    const etag = `"${user.updated_at.getTime()}-${userRole}"`;
+    res.set({
+      'ETag': etag,
+      'Cache-Control': 'private, must-revalidate',
+    });
+
+    // Check if client has matching ETag (304 Not Modified)
+    if (req.headers['if-none-match'] === etag) {
+      return res.status(304).end();
+    }
+
     res.json({ user });
   })
 );

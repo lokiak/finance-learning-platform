@@ -1,7 +1,10 @@
+export type UserRole = 'user' | 'admin';
+
 export interface User {
   id: string;
   email: string;
   name: string;
+  role?: UserRole;
   created_at: Date;
   updated_at: Date;
   last_login: Date | null;
