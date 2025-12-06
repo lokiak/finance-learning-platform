@@ -6,10 +6,7 @@ interface ProactiveSupportPanelProps {
   sectionId?: string;
 }
 
-export const ProactiveSupportPanel: React.FC<ProactiveSupportPanelProps> = ({
-  moduleId,
-  sectionId,
-}) => {
+export const ProactiveSupportPanel: React.FC<ProactiveSupportPanelProps> = () => {
   const {
     activeHints,
     breakSuggestion,

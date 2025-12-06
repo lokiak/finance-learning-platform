@@ -110,12 +110,60 @@
 
   /* Card styles */
   .card-peaceful {
-    @apply bg-white rounded-gentle shadow-soft border border-sage-100;
+    @apply bg-white rounded-extra shadow-soft border border-sage-100;
     transition: all 0.3s var(--transition-gentle);
   }
 
   .card-peaceful:hover {
     @apply shadow-gentle border-sage-200;
+  }
+
+  /* Glass variant */
+  .card-glass {
+    @apply bg-white/70 backdrop-blur-lg rounded-extra shadow-gentle border border-white/20;
+    transition: all 0.3s var(--transition-gentle);
+  }
+
+  .card-glass:hover {
+    background-color: rgba(255, 255, 255, 0.85);
+    @apply shadow-floating;
+  }
+
+  /* Elevated variant */
+  .card-elevated {
+    @apply bg-white rounded-extra shadow-floating border border-sage-100;
+    transition: all 0.3s var(--transition-gentle);
+  }
+
+  .card-elevated:hover {
+    @apply shadow-floating;
+    transform: scale(1.02);
+  }
+
+  /* Gradient variant */
+  .card-gradient {
+    @apply bg-gradient-to-br from-white via-sage-50/30 to-white rounded-extra shadow-soft border border-sage-100/50;
+    transition: all 0.3s var(--transition-gentle);
+  }
+
+  .card-gradient:hover {
+    @apply shadow-gentle;
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 1), rgba(232, 240, 232, 0.4), rgba(255, 255, 255, 1));
+  }
+
+  /* Interactive variant */
+  .card-interactive {
+    @apply bg-white rounded-extra shadow-gentle border-2 border-sage-200;
+    transition: all 0.2s var(--transition-gentle);
+  }
+
+  .card-interactive:hover {
+    @apply shadow-floating border-sage-400;
+    transform: scale(1.02);
+  }
+
+  .card-interactive:active {
+    transform: scale(0.98);
   }
 
   /* Button base styles */
@@ -248,6 +296,101 @@
   .breathing-circle {
     @apply w-32 h-32 rounded-full bg-gradient-to-br from-sage-400 to-sage-600;
     @apply animate-breathe shadow-gentle;
+  }
+
+  /* Stagger animation keyframes */
+  @keyframes stagger {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Glow animation keyframes */
+  @keyframes glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(90, 146, 90, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(90, 146, 90, 0.5);
+    }
+  }
+
+  /* Welcome Page - Ocean Background */
+  .ocean-background {
+    position: relative;
+    overflow: hidden;
+  }
+
+  @keyframes ocean-flow {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes ocean-flow-reverse {
+    0%, 100% {
+      background-position: 100% 50%;
+    }
+    50% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animate-ocean-flow {
+    animation: ocean-flow 15s ease-in-out infinite;
+    background-size: 200% 200%;
+  }
+
+  .animate-ocean-flow-reverse {
+    animation: ocean-flow-reverse 20s ease-in-out infinite;
+    background-size: 200% 200%;
+  }
+
+  /* Welcome Page - Prompt Bubble */
+  .welcome-prompt-bubble {
+    @apply bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-6 shadow-gentle;
+    transition: all 0.3s ease-out;
+  }
+
+  /* Welcome Page - Input */
+  .welcome-input {
+    @apply w-full px-6 py-4 bg-white/20 backdrop-blur-lg border-2 border-white/30 rounded-2xl;
+    @apply text-lg text-white placeholder-white/60;
+    @apply focus:outline-none focus:border-white/50 focus:bg-white/25 focus:scale-[1.02];
+    @apply transition-all duration-200;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .welcome-input:hover:not(:focus):not(:disabled) {
+    @apply border-white/40;
+    background-color: rgba(255, 255, 255, 0.22);
+  }
+
+  /* Welcome Page - Send Button */
+  .welcome-send-button {
+    @apply absolute right-2 top-1/2 -translate-y-1/2;
+    @apply w-12 h-12 rounded-full bg-white/25 backdrop-blur-md border border-white/30;
+    @apply text-white hover:bg-white/35 hover:scale-105 active:scale-95;
+    @apply transition-all duration-200;
+    @apply disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100;
+    @apply flex items-center justify-center;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent;
+  }
+
+  /* Welcome Page - Skip Link */
+  .welcome-skip-link {
+    @apply text-sm text-white/70 hover:text-white/90;
+    @apply underline-offset-4 hover:underline;
+    @apply transition-colors duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent rounded;
   }
 }
 

@@ -167,6 +167,8 @@ export default {
         'gentle': '0 4px 16px -4px rgba(0, 0, 0, 0.08), 0 8px 24px -4px rgba(0, 0, 0, 0.04)',
         'floating': '0 8px 32px -8px rgba(0, 0, 0, 0.12), 0 16px 48px -8px rgba(0, 0, 0, 0.06)',
         'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.04)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        'glow': '0 0 20px rgba(90, 146, 90, 0.3)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
@@ -177,6 +179,8 @@ export default {
         'float': 'float 6s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
         'pulse-gentle': 'pulseGentle 3s ease-in-out infinite',
+        'stagger': 'stagger 0.5s ease-out',
+        'glow': 'glow 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {

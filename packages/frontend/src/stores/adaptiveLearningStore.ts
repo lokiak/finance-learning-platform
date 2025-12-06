@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import {
   LearningStyle,
-  ConceptMastery,
   AdaptedContent,
   LearningPath,
   RemediationPath,
@@ -26,7 +25,7 @@ interface AdaptiveLearningState {
   clearError: () => void;
 }
 
-export const useAdaptiveLearningStore = create<AdaptiveLearningState>((set, get) => ({
+export const useAdaptiveLearningStore = create<AdaptiveLearningState>((set) => ({
   learningStyle: null,
   currentPath: null,
   masteryLevels: {},

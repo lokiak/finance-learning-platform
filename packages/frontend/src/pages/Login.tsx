@@ -23,7 +23,7 @@ export default function Login() {
         type: 'success',
         message: 'Welcome back!',
       });
-      navigate('/dashboard');
+      navigate('/welcome');
     } catch (error) {
       // Error is already set in store
     }

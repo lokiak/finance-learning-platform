@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import type { ReactElement } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 
 // Layout
@@ -10,6 +11,7 @@ import AuthLayout from '@/components/layout/AuthLayout';
 // Pages
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import Welcome from '@/pages/Welcome';
 import Dashboard from '@/pages/Dashboard';
 import Modules from '@/pages/Modules';
 import ModuleView from '@/pages/ModuleView';
@@ -38,14 +40,83 @@ const queryClient = new QueryClient({
   },
 });
 
+// Default redirect component that uses hooks directly
+function DefaultRedirect() {
+  const { isAuthenticated, isLoading } = useAuthStore();
+
+  // Debug logging
+  useEffect(() => {
+    console.log('DefaultRedirect - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+  }, [isLoading, isAuthenticated]);
+
+  // Show loading while checking auth state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cream-50">
+        <div className="text-center">
+          <div className="breathing-circle mx-auto mb-4"></div>
+          <p className="text-earth-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    console.log('DefaultRedirect - Redirecting to /login');
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check if user has seen welcome page
+  const hasSeenWelcome = localStorage.getItem('has_seen_welcome') === 'true';
+  console.log('DefaultRedirect - hasSeenWelcome:', hasSeenWelcome);
+
+  if (hasSeenWelcome) {
+    console.log('DefaultRedirect - Redirecting to /dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  console.log('DefaultRedirect - Redirecting to /welcome');
+  return <Navigate to="/welcome" replace />;
+}
+
+// Auth route redirect component
+function AuthRedirect({ children }: { children: ReactElement }) {
+  const { isAuthenticated, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cream-50">
+        <div className="text-center">
+          <div className="breathing-circle mx-auto mb-4"></div>
+          <p className="text-earth-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    const hasSeenWelcome = localStorage.getItem('has_seen_welcome') === 'true';
+    return <Navigate to={hasSeenWelcome ? '/dashboard' : '/welcome'} replace />;
+  }
+
+  return children;
+}
+
 function App() {
-  const { loadUser, isAuthenticated } = useAuthStore();
+  const { loadUser, isLoading } = useAuthStore();
   const { toasts, removeToast } = useToastStore();
 
   useEffect(() => {
-    loadUser();
+    loadUser().catch((error) => {
+      console.error('Failed to load user:', error);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
+
+  // Debug logging
+  useEffect(() => {
+    console.log('App render - isLoading:', isLoading);
+  }, [isLoading]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -57,13 +128,31 @@ function App() {
           <Route element={<AuthLayout />}>
             <Route
               path="/login"
-              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
+              element={
+                <AuthRedirect>
+                  <Login />
+                </AuthRedirect>
+              }
             />
             <Route
               path="/register"
-              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />}
+              element={
+                <AuthRedirect>
+                  <Register />
+                </AuthRedirect>
+              }
             />
           </Route>
+
+          {/* Welcome page - no layout, full screen */}
+          <Route
+            path="/welcome"
+            element={
+              <ProtectedRoute>
+                <Welcome />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
@@ -85,10 +174,7 @@ function App() {
           </Route>
 
           {/* Default redirect */}
-          <Route
-            path="/"
-            element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />}
-          />
+          <Route path="/" element={<DefaultRedirect />} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />

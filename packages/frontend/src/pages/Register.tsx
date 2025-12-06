@@ -54,7 +54,7 @@ export default function Register() {
         type: 'success',
         message: 'Account created successfully! Welcome to Finance Learning Platform.',
       });
-      navigate('/dashboard');
+      navigate('/welcome');
     } catch (error) {
       // Error is already set in store
     }

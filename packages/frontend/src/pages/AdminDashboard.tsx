@@ -129,13 +129,13 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-earth-700">Average Accuracy</span>
                 <Badge
-                  variant={
-                    data.predictions.stressPredictionAccuracy.averageAccuracy >= 75
-                      ? 'success'
-                      : data.predictions.stressPredictionAccuracy.averageAccuracy >= 50
-                      ? 'warning'
-                      : 'error'
-                  }
+variant={
+                         data.predictions.stressPredictionAccuracy.averageAccuracy >= 75
+                           ? 'success'
+                           : data.predictions.stressPredictionAccuracy.averageAccuracy >= 50
+                           ? 'warning'
+                           : 'danger'
+                       }
                 >
                   {data.predictions.stressPredictionAccuracy.averageAccuracy.toFixed(1)}%
                 </Badge>
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
                       ? 'success'
                       : data.adaptations.learningStyleDetection.detectionConfidence.average >= 0.5
                       ? 'warning'
-                      : 'error'
+                      : 'danger'
                   }
                 >
                   {(data.adaptations.learningStyleDetection.detectionConfidence.average * 100).toFixed(1)}%
@@ -321,7 +321,7 @@ export default function AdminDashboard() {
               {data.engagement.dropOffPoints.slice(0, 5).map((point: any) => (
                 <div key={point.moduleId} className="flex justify-between items-center">
                   <span className="text-sm text-earth-700 truncate flex-1">{point.moduleTitle}</span>
-                  <Badge variant={point.dropOffRate >= 30 ? 'error' : 'warning'}>
+                  <Badge variant={point.dropOffRate >= 30 ? 'danger' : 'warning'}>
                     {point.dropOffRate.toFixed(1)}%
                   </Badge>
                 </div>
@@ -354,7 +354,7 @@ export default function AdminDashboard() {
                       ? 'success'
                       : data.reflection.completionRate >= 50
                       ? 'warning'
-                      : 'error'
+                      : 'danger'
                   }
                 >
                   {data.reflection.completionRate.toFixed(1)}%
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
                   ? 'success'
                   : data.performance.errorRate <= 25
                   ? 'warning'
-                  : 'error'
+                  : 'danger'
               }
             >
               {data.performance.errorRate.toFixed(1)}%

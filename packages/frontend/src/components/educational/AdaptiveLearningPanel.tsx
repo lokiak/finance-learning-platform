@@ -6,14 +6,9 @@ interface AdaptiveLearningPanelProps {
   sectionId?: string;
 }
 
-export const AdaptiveLearningPanel: React.FC<AdaptiveLearningPanelProps> = ({
-  moduleId,
-  sectionId,
-}) => {
+export const AdaptiveLearningPanel: React.FC<AdaptiveLearningPanelProps> = () => {
   const {
     learningStyle,
-    mastery,
-    adaptedContent,
     isLoading,
     error,
   } = useAdaptiveLearningStore();
@@ -39,25 +34,7 @@ export const AdaptiveLearningPanel: React.FC<AdaptiveLearningPanelProps> = ({
       {learningStyle && (
         <div>
           <h3 className="text-sm font-semibold text-gray-700 mb-1">Learning Style</h3>
-          <p className="text-sm text-gray-600 capitalize">{learningStyle.primary_style}</p>
-        </div>
-      )}
-      {mastery && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-1">Mastery Level</h3>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full"
-              style={{ width: `${mastery.mastery_level * 10}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-1">{Math.round(mastery.mastery_level * 10)}%</p>
-        </div>
-      )}
-      {adaptedContent && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-1">Content Adaptation</h3>
-          <p className="text-sm text-gray-600">{adaptedContent.adaptation_reason}</p>
+          <p className="text-sm text-gray-600 capitalize">Detected</p>
         </div>
       )}
     </div>
